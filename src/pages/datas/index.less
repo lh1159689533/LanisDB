@@ -1,0 +1,33 @@
+.data-page {
+  @apply flex flex-col h-full;
+
+  header {
+    // z-index: 201;
+    position: relative;
+  }
+
+  main {
+    height: calc(100vh - 55px);
+    display: flex;
+
+    .sidebar {
+      padding-top: 5px;
+      width: 260px;
+      @apply h-full bg-white overflow-y-auto;
+    }
+
+    section {
+      width: calc(100% - 260px);
+      @apply flex flex-col overflow-hidden;
+
+      .sql-tabs {
+        // height: 40%;
+      }
+
+      .data-list {
+        // max-height: 80%;
+        @apply flex-1 z-10;
+      }
+    }
+  }
+}

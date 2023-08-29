@@ -1,0 +1,109 @@
+import { useEffect, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { AddCardOutlined, NoteAddOutlined } from '@mui/icons-material';
+import dayjs from 'dayjs';
+import Tabs from '@src/components/tabs';
+import useAppState from '@src/hooks/useAppState';
+import Header from './header';
+import Sidebar from '../sidebar';
+import useTab from '@hooks/useTab';
+import Resize from '@components/resize';
+import { IOperateItem, ITab } from '@src/types';
+import DB from '@src/utils/db';
+
+import './index.less';
+
+export default function Datas() {
+  const [sqlTabs = []] = useAppState<ITab[]>('sqlQuery');
+  const [resultTabs = []] = useAppState<ITab[]>('sqlQueryResult');
+
+  const [db] = useAppState<DB>('dbInstance');
+
+  const [height, setHeight] = useState(0);
+  const [resultTabsHeight, setResultTabsHeight] = useState(0);
+
+  const sectionRef = useRef(null);
+
+  const history = useHistory();
+
+  const tab = useTab('sqlQuery');
+
+  const itemList: IOperateItem[] = [
+    {
+      key: 'newConnection',
+      title: '新建连接',
+      icon: <AddCardOutlined />,
+      handle() {
+        db.close();
+        history.push('/');
+      },
+    },
+    {
+      key: 'newQuery',
+      title: '新建查询',
+      icon: <NoteAddOutlined />,
+      handle() {
+        tab.add({
+          key: `newquery${dayjs().millisecond()}`,
+          title: '新建查询',
+          saved: true,
+          comp: 'SqlQueryEditor',
+          onClose(key: string) {
+            tab.remove(key);
+          },
+        });
+      },
+    },
+  ];
+
+  const resize = () => {
+    const sectionHeight = sectionRef.current?.getBoundingClientRect().height;
+    setHeight(sectionHeight);
+    if (sqlTabs?.length) {
+      setResultTabsHeight(sectionRef.current?.getBoundingClientRect().height * 0.58);
+    } else {
+      setResultTabsHeight(sectionHeight);
+    }
+  };
+
+  const onResize = (size: number) => {
+    setResultTabsHeight(size);
+  };
+
+  useEffect(() => {
+    return () => {
+      tab.clear();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (sectionRef.current) {
+      resize();
+    }
+    window.addEventListener('resize', resize);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+    };
+  }, [sectionRef.current, sqlTabs]);
+
+  return (
+    <div className="data-page">
+      <Header items={itemList} className="header" />
+      <main>
+        <div className="sidebar">
+          <Sidebar />
+        </div>
+        <section ref={sectionRef}>
+          <div className="sql-tabs">
+            {sqlTabs?.length ? <Tabs tabs={sqlTabs} tabKey="sqlQuery" height={height - resultTabsHeight} /> : null}
+          </div>
+          <div className="data-list border-t relative">
+            {sqlTabs?.length ? <Resize type="row" callback={onResize} max={height * 0.9} min={height * 0.3} /> : null}
+            {resultTabs?.length ? <Tabs tabs={resultTabs} tabKey="sqlQueryResult" height={resultTabsHeight} /> : null}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
