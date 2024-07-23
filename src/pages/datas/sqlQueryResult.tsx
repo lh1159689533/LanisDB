@@ -82,7 +82,7 @@ export default function VirtualResultTable({
   useEffect(() => {
     height &&
       setTableScrollY(
-        height - 56 - 39 - (tableType === 'page' ? 48 : 0) // 56头部操作栏, 48分页, 39表头
+        height - 47 - (tableType === 'page' ? 48 : 0) // 56头部操作栏, 48分页, 39表头
       );
   }, [height]);
 
@@ -100,7 +100,7 @@ export default function VirtualResultTable({
   }, [columnList, data]);
 
   return (
-    <div role="tabpanel" hidden={value !== current}>
+    <div role="tabpanel" hidden={value !== current} style={{ height: '100%' }}>
       <Box sx={{ p: 0, height: '100%' }}>
         <AppBar items={items} type="icon" />
         <div className="overflow-x-hidden">

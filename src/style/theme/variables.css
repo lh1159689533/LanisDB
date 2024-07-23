@@ -1,0 +1,144 @@
+/**
+ * Do not edit directly
+ * Generated on Wed, 10 Jan 2024 12:29:20 GMT
+ */
+
+:root {
+  --font-size-h6-24px: 500 24px/30px PingFang SC;
+  --font-size-h5-20px: 500 20px/28px PingFang SC;
+  --font-size-h4-16px: 400 16px/24px PingFang SC;
+  --font-size-h3-14px: 400 14px/22px PingFang SC;
+  --font-code-12px: 400 12px/18px Hack;
+  --font-size-h2-12px: 400 12px/20px PingFang SC;
+  --font-size-h1-10px: 400 10px/18px PingFang SC;
+  --orange-light-10: rgba(128, 15, 0, 1);
+  --orange-light-9: rgba(160, 40, 0, 1);
+  --orange-light-8: rgba(191, 64, 0, 1);
+  --orange-light-7: rgba(223, 89, 0, 1);
+  --orange-light-6: rgba(255, 114, 0, 1);
+  --orange-light-5: rgba(255, 138, 42, 1);
+  --orange-light-4: rgba(255, 161, 85, 1);
+  --orange-light-3: rgba(255, 185, 127, 1);
+  --orange-light-2: rgba(255, 208, 170, 1);
+  --orange-light-1: rgba(255, 232, 213, 1);
+  --orange-dark-10: rgba(249, 233, 209, 1);
+  --orange-dark-9: rgba(247, 207, 164, 1);
+  --orange-dark-8: rgba(238, 176, 120, 1);
+  --orange-dark-7: rgba(213, 135, 75, 1);
+  --orange-dark-6: rgba(227, 127, 50, 1);
+  --orange-dark-5: rgba(143, 80, 37, 1);
+  --orange-dark-4: rgba(101, 60, 33, 1);
+  --orange-dark-3: rgba(70, 46, 31, 1);
+  --orange-dark-2: rgba(53, 35, 26, 1);
+  --orange-dark-1: rgba(33, 26, 25, 1);
+  --red-light-10: rgba(131, 18, 56, 1);
+  --red-light-9: rgba(156, 31, 59, 1);
+  --red-light-8: rgba(180, 43, 63, 1);
+  --red-light-7: rgba(204, 56, 66, 1);
+  --red-light-6: rgba(229, 69, 69, 1);
+  --red-light-5: rgba(233, 100, 100, 1);
+  --red-light-4: rgba(238, 131, 131, 1);
+  --red-light-3: rgba(242, 162, 162, 1);
+  --red-light-2: rgba(246, 193, 193, 1);
+  --red-light-1: rgba(251, 224, 224, 1);
+  --red-dark-10: rgba(250, 239, 236, 1);
+  --red-dark-9: rgba(248, 209, 202, 1);
+  --red-dark-8: rgba(243, 171, 160, 1);
+  --red-dark-7: rgba(220, 122, 111, 1);
+  --red-dark-6: rgba(230, 89, 76, 1);
+  --red-dark-5: rgba(158, 67, 62, 1);
+  --red-dark-4: rgba(117, 54, 54, 1);
+  --red-dark-3: rgba(86, 45, 48, 1);
+  --red-dark-2: rgba(66, 35, 41, 1);
+  --red-dark-1: rgba(43, 28, 36, 1);
+  --green-light-10: rgba(5, 95, 68, 1);
+  --green-light-9: rgba(6, 119, 74, 1);
+  --green-light-8: rgba(7, 143, 80, 1);
+  --green-light-7: rgba(9, 167, 85, 1);
+  --green-light-6: rgba(10, 191, 91, 1);
+  --green-light-5: rgba(51, 202, 118, 1);
+  --green-light-4: rgba(92, 212, 146, 1);
+  --green-light-3: rgba(132, 223, 173, 1);
+  --green-light-2: rgba(173, 234, 200, 1);
+  --green-light-1: rgba(214, 244, 228, 1);
+  --green-dark-10: rgba(207, 220, 208, 1);
+  --green-dark-9: rgba(194, 206, 194, 1);
+  --green-dark-8: rgba(158, 190, 160, 1);
+  --green-dark-7: rgba(115, 170, 121, 1);
+  --green-dark-6: rgba(88, 174, 98, 1);
+  --green-dark-5: rgba(66, 122, 76, 1);
+  --green-dark-4: rgba(53, 93, 64, 1);
+  --green-dark-3: rgba(43, 70, 55, 1);
+  --green-dark-2: rgba(34, 53, 45, 1);
+  --green-dark-1: rgba(26, 37, 38, 1);
+  --black-5: rgba(0, 0, 0, 0.251);
+  --black-4: rgba(0, 0, 0, 0.4);
+  --black-3: rgba(0, 0, 0, 0.659);
+  --black-2: rgba(0, 0, 0, 0.898);
+  --black-1: rgba(0, 0, 0, 1);
+  --white-6: rgba(255, 255, 255, 0.161);
+  --white-5: rgba(255, 255, 255, 0.278);
+  --white-4: rgba(255, 255, 255, 0.4);
+  --white-3: rgba(255, 255, 255, 0.722);
+  --white-2: rgba(255, 255, 255, 0.929);
+  --white-1: rgba(255, 255, 255, 1);
+  --blue-light-10: rgba(0, 23, 128, 1);
+  --blue-light-9: rgba(0, 45, 160, 1);
+  --blue-light-8: rgba(0, 66, 191, 1);
+  --blue-light-7: rgba(0, 88, 223, 1);
+  --blue-light-6: rgba(0, 110, 255, 1);
+  --blue-light-5: rgba(42, 134, 255, 1);
+  --blue-light-4: rgba(85, 158, 255, 1);
+  --blue-light-3: rgba(127, 183, 255, 1);
+  --blue-light-2: rgba(170, 207, 255, 1);
+  --blue-light-1: rgba(213, 231, 255, 1);
+  --blue-dark-10: rgba(210, 233, 251, 1);
+  --blue-dark-9: rgba(169, 211, 248, 1);
+  --blue-dark-8: rgba(128, 186, 244, 1);
+  --blue-dark-7: rgba(83, 151, 229, 1);
+  --blue-dark-6: rgba(47, 129, 238, 1);
+  --blue-dark-5: rgba(39, 93, 167, 1);
+  --blue-dark-4: rgba(34, 72, 127, 1);
+  --blue-dark-3: rgba(31, 57, 97, 1);
+  --blue-dark-2: rgba(26, 44, 77, 1);
+  --blue-dark-1: rgba(23, 32, 55, 1);
+  --gray-light-6: rgba(158, 172, 190, 1);
+  --gray-light-5: rgba(183, 193, 206, 1);
+  --gray-light-4: rgba(207, 213, 222, 1);
+  --gray-light-3: rgba(219, 223, 230, 1);
+  --gray-light-2: rgba(231, 234, 239, 1);
+  --gray-light-1: rgba(243, 244, 247, 1);
+  --gray-dark-6: rgba(55, 61, 76, 1);
+  --gray-dark-5: rgba(46, 51, 64, 1);
+  --gray-dark-4: rgba(35, 40, 50, 1);
+  --gray-dark-3: rgba(27, 32, 41, 1);
+  --gray-dark-2: rgba(23, 27, 36, 1);
+  --gray-dark-1: rgba(17, 20, 27, 1);
+
+  /* 字体 family token */
+  --wedata-font-family: PingFang SC, Microsoft YaHei, Hack;
+  --wedata-font-family-medium: PingFang SC, Microsoft YaHei, Hack;
+
+  /* 字体大小 token */
+  --wedata-font-size-h1: 10px;
+  --wedata-font-size-h2: 12px;
+  --wedata-font-code: 12px;
+  --wedata-font-size-h3: 14px;
+  --wedata-font-size-h4: 16px;
+  --wedata-font-size-h5: 20px;
+  --wedata-font-size-h6: 24px;
+
+  /* 字体行高 token */
+  --wedata-line-height-size-h1: 18px;
+  --wedata-line-height-size-h2: 20px;
+  --wedata-line-height-code: 18px;
+  --wedata-line-height-size-h3: 22px;
+  --wedata-line-height-size-h4: 24px;
+  --wedata-line-height-size-h5: 28px;
+  --wedata-line-height-size-h6: 30px;
+
+  /* 字体粗细 token */
+  --wedata-font-weight-400: 400;
+  --wedata-font-weight-500: 500;
+  --wedata-font-weight-600: 600;
+}

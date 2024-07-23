@@ -22,6 +22,7 @@
     "@types/react-router-dom": "^5.3.3",
     "antd": "^5.7.3",
     "dayjs": "^1.11.9",
+    "dt-sql-parser": "^4.0.2",
     "final-form": "^4.20.9",
     "highlight.js": "^11.8.0",
     "localforage": "^1.10.0",
@@ -36,6 +37,7 @@
     "react-window": "^1.8.9",
     "redux": "^4.2.1",
     "sequelize": "^7.0.0-alpha2.1",
+    "syntax-parser": "^1.0.18",
     "tabulator-tables": "^5.5.1"
   },
   "devDependencies": {

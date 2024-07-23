@@ -22,7 +22,15 @@ export default function CusAppBar({ items, type = 'button' }: IAppBar) {
   }, [items]);
 
   return (
-    <AppBar position="relative" color="transparent" sx={{ boxShadow: 'none' }}>
+    <AppBar
+      position="relative"
+      color="transparent"
+      sx={{
+        boxShadow: 'none',
+        borderBottom: '1px solid var(--lanis-db-stroke-color-primary)',
+        backgroundColor: 'var(--lanis-db-bg-color-tool-bar)',
+      }}
+    >
       <Box
         sx={{
           flexGrow: 1,

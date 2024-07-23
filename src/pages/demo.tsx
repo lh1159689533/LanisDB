@@ -1,5 +1,5 @@
-import Editor from '@src/components/sqlEditor';
+import { MonacoEditor } from '@src/components/MonacoEditor';
 
-export default function() {
-  return <Editor height={500} />;
+export default function () {
+  return <MonacoEditor style={{ height: 500 }} />;
 }

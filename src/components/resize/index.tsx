@@ -1,79 +1,78 @@
-import React, { useEffect, useRef, useState } from 'react';
-import './style.less';
+import { useEffect, useRef, useState } from 'react';
 
-interface ExternalProps {
-  callback?: (size: number) => void;
-  onMouseDown?: () => void;
+import './index.less';
+
+interface IReSizeProps {
   isMax?: boolean;
   min?: number;
   max?: number;
-  type?: 'col' | 'row';
+  type?: string;
   style?: any;
+  onResize?: (size: number) => void;
+  onResizeStart?: () => void;
+  onResizeStop?: () => void;
 }
 
 /**
  * @description 鼠标按下(mouseDown)时，监听mousemove事件，当鼠标x坐标发生变化时，调用dragWidth并将x坐标值作为第一个参数
- * @param callback 是一个Function，用于改变容器宽/高，实现拖动鼠标改变容器宽度的效果，必填项
+ * @param onResize 是一个Function，用于改变容器宽/高，实现拖动鼠标改变容器宽度的效果，必填项
  * @param isMax 是否最大，当父组件使用全屏按钮时，用于改变direction的值，以改变样式显示
  * @param min 最小值，非必填，默认0
  * @param max 最大值，非必填
  * @param type 类型: col 改变宽度 默认值, row 改变高度
- * @example <div width={col}><ReSize callback={col => setWid(col)} type='col' /></div>
- * @author hhhuilli
+ * @example <div width={col}><ReSize onResize={col => setWid(col)} type='col' /></div>
  */
-const ReSize: React.FC<ExternalProps> = ({
-  callback,
-  onMouseDown,
+export default function ReSize({
   isMax = false,
   min = 0,
   max,
   type = 'col',
   style,
-}) => {
-  const dragEle = useRef(null);
-  const timer = useRef(null);
-  const time = useRef(null);
-  const limitRef = useRef({ min, max });
-  let drager = null;
-
+  onResize,
+  onResizeStart,
+  onResizeStop,
+}: IReSizeProps) {
   // 控制cursor样式
   const [direction, setDirection] = useState('default');
+  const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    typeof min === 'number' && (limitRef.current.min = min);
-    max && (limitRef.current.max = max - 5);
-  }, [min, max]);
+  const dragEle = useRef(null);
+  const timer = useRef(null);
+  const maxRef = useRef(max);
+  const minRef = useRef(null);
+
+  let drager = null;
 
   const dragWidth = (e) => {
-    const { min, max } = limitRef.current;
+    const { x: left = 0 } = dragEle.current.parentElement?.getBoundingClientRect();
     let x = e.clientX;
     let direction = 'default';
-    if (min && x < min) {
-      x = min;
+    if (minRef.current && x <= minRef.current + left) {
+      x = minRef.current;
       direction = 'min';
-    }
-    if (max && x > max) {
-      x = max;
+    } else if (maxRef.current && x >= maxRef.current + left) {
+      x = maxRef.current;
       direction = 'max';
+    } else {
+      x = x - left;
     }
     setDirection(direction);
-    callback?.(x);
+    onResize?.(x);
   };
 
   const dragHeight = (e) => {
-    const { min, max } = limitRef.current;
     let y = document.body.clientHeight - e.clientY;
     let direction = 'default';
-    if (min && y < min) {
-      y = min;
+    if (minRef.current && y < minRef.current) {
+      y = minRef.current;
       direction = 'min';
     }
-    if (max && y > max) {
-      y = max;
+    if (maxRef.current && y > maxRef.current) {
+      y = maxRef.current;
       direction = 'max';
     }
     setDirection(direction);
-    callback?.(y);
+    onResize?.(y);
   };
 
   /**
@@ -81,27 +80,12 @@ const ReSize: React.FC<ExternalProps> = ({
    * @param e MouseEvent
    */
   const mouseMove = (e) => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = null;
-    }
-    function fn() {
-      if (type === 'col') {
-        dragWidth(e);
-      } else {
-        dragHeight(e);
-      }
-    }
-    const curr = new Date().getTime();
-    if (curr - time.current > 50) {
-      fn();
-      time.current = curr;
+    if (new Date().getTime() - timer.current < 50) return;
+    timer.current = new Date().getTime();
+    if (type === 'col') {
+      dragWidth(e);
     } else {
-      timer.current = setTimeout(() => {
-        fn();
-        clearTimeout(timer.current);
-        timer.current = null;
-      }, 20);
+      dragHeight(e);
     }
   };
 
@@ -109,6 +93,8 @@ const ReSize: React.FC<ExternalProps> = ({
    * 鼠标抬起时，移除mousemove、mouseup监听
    */
   const mouseUp = () => {
+    onResizeStop?.();
+    setIsDragging(false);
     document.removeEventListener('mousemove', mouseMove);
     document.removeEventListener('mouseup', mouseUp);
   };
@@ -118,9 +104,10 @@ const ReSize: React.FC<ExternalProps> = ({
    * @param e MouseEvent
    */
   const mouseDown = (e) => {
+    onResizeStart?.();
+    setIsDragging(true);
     document?.addEventListener('mousemove', mouseMove);
     document?.addEventListener('mouseup', mouseUp);
-    onMouseDown?.();
     e.preventDefault();
   };
 
@@ -148,13 +135,19 @@ const ReSize: React.FC<ExternalProps> = ({
     }
   }, [isMax]);
 
+  useEffect(() => {
+    maxRef.current = max;
+  }, [max]);
+
+  useEffect(() => {
+    minRef.current = min;
+  }, [min]);
+
   return (
     <div
       ref={dragEle}
-      className={`resize ${type}-resize ${type}-resize-${direction}`}
+      className={`resize ${type}-resize ${type}-resize-${direction} ${isDragging ? 'is-dragging' : ''}`}
       style={style || {}}
     />
   );
-};
-
-export default ReSize;
+}

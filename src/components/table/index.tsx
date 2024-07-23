@@ -74,7 +74,7 @@ export default forwardRef<any, ICusTable>(
       },
       del() {},
       getRows() {},
-      getSelRows() {}
+      getSelRows() {},
     }));
 
     const handlePageChange = (_, current: number) => {
@@ -135,7 +135,7 @@ export default forwardRef<any, ICusTable>(
     useEffect(() => {
       if (tableRef.current) {
         tableInstance.current = new Tabulator(tableRef.current, {
-          maxHeight: height,
+          // maxHeight: height,
           layout: 'fitColumns',
           // resizableColumnFit: true,
           columns: [selectable, ...getColumns(columns)],
@@ -145,13 +145,19 @@ export default forwardRef<any, ICusTable>(
           selectable: 'highlight',
         });
       }
-    }, [tableRef.current, height, columns]);
+    }, [tableRef.current, columns]);
 
     useEffect(() => {
       if (data && tableInstance.current?.initialized) {
         tableInstance.current.replaceData(data);
       }
     }, [data]);
+
+    useEffect(() => {
+      if (tableInstance.current?.initialized) {
+        tableInstance.current.setHeight(height);
+      }
+    }, [height]);
 
     return (
       <>

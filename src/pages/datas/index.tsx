@@ -22,6 +22,7 @@ export default function Datas() {
 
   const [height, setHeight] = useState(0);
   const [resultTabsHeight, setResultTabsHeight] = useState(0);
+  const [sqlTabsHeight, setSqlTabsHeight] = useState(0);
 
   const sectionRef = useRef(null);
 
@@ -61,16 +62,18 @@ export default function Datas() {
 
   const resize = () => {
     const sectionHeight = sectionRef.current?.getBoundingClientRect().height;
-    setHeight(sectionHeight);
-    if (sqlTabs?.length) {
-      setResultTabsHeight(sectionRef.current?.getBoundingClientRect().height * 0.58);
-    } else {
-      setResultTabsHeight(sectionHeight);
+    let resultHeight = 0;
+    if (resultTabs?.length) {
+      resultHeight = sqlTabs?.length ? sectionHeight * 0.58 : sectionHeight;
     }
+    setHeight(sectionHeight);
+    setResultTabsHeight(resultHeight);
+    setSqlTabsHeight(height - resultHeight);
   };
 
   const onResize = (size: number) => {
     setResultTabsHeight(size);
+    setSqlTabsHeight(height - size);
   };
 
   useEffect(() => {
@@ -88,7 +91,7 @@ export default function Datas() {
     return () => {
       window.removeEventListener('resize', resize);
     };
-  }, [sectionRef.current, sqlTabs]);
+  }, [sectionRef.current, sqlTabs, resultTabs]);
 
   return (
     <div className="data-page">
@@ -99,10 +102,10 @@ export default function Datas() {
         </div>
         <section ref={sectionRef}>
           <div className="sql-tabs">
-            {sqlTabs?.length ? <Tabs tabs={sqlTabs} tabKey="sqlQuery" height={height - resultTabsHeight} /> : null}
+            {sqlTabs?.length ? <Tabs tabs={sqlTabs} tabKey="sqlQuery" height={sqlTabsHeight} /> : null}
           </div>
           <div className="data-list relative">
-            {sqlTabs?.length ? <Resize type="row" callback={onResize} max={height * 0.9} min={height * 0.3} /> : null}
+            {sqlTabs?.length ? <Resize type="row" onResize={onResize} max={height * 0.9} min={45} /> : null}
             {resultTabs?.length ? <Tabs tabs={resultTabs} tabKey="sqlQueryResult" height={resultTabsHeight} /> : null}
           </div>
         </section>

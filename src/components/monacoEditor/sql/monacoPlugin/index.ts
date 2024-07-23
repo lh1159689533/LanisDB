@@ -1,0 +1,1 @@
+export { provideCompletionItems } from './provideCompletionItems';

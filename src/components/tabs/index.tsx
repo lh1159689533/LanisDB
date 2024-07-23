@@ -17,13 +17,12 @@ interface ITabProps {
 
 const StyledTabList = styled(TabList)(() => ({
   '.MuiTabs-flexContainer': {
-    backgroundColor: '#f9fafb',
     minHeight: 32,
   },
   '.MuiTabs-indicator': {
     top: 0,
     height: 1.5,
-    backgroundColor: 'var(--lanis-db-primary-color)'
+    backgroundColor: 'var(--lanis-db-primary-color)',
   },
 }));
 
@@ -101,7 +100,7 @@ export default function LTabs({ tabs, tabKey, height }: ITabProps) {
           <Box sx={{ borderColor: 'divider' }}>
             <StyledTabList
               onChange={handleChange}
-              sx={{ minHeight: 32, bgcolor: '#f9fafb' }}
+              sx={{ minHeight: 32, bgcolor: 'var(--lanis-db-bg-color-tab-bar)' }}
               aria-label="tabs"
               variant="scrollable"
               visibleScrollbar
@@ -121,7 +120,7 @@ export default function LTabs({ tabs, tabKey, height }: ITabProps) {
                   value={tab.key}
                   icon={
                     <CloseOutlined
-                      className='ml-2'
+                      className="ml-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         tab.onClose?.(tab.key);

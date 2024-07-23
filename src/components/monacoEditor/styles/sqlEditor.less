@@ -1,0 +1,44 @@
+.sql-monaco-editor {
+  @font-face {
+    font-family: 'editor-iconfont';
+    src:
+      url('../fonts/iconfont.ttf') format('woff2'),
+      url('../fonts/iconfont.woff') format('woff'),
+      url('../fonts/iconfont.woff2') format('truetype');
+  }
+
+  .monaco-editor {
+    .codicon.codicon-symbol-function,
+    .codicon.codicon-symbol-value,
+    .codicon-symbol-constructor {
+      font-family: editor-iconfont;
+      color: var(--text-color-placeholder) !important;
+    }
+
+    .codicon-symbol-constructor:before {
+      content: '\e675';
+    }
+
+    .codicon-symbol-function:before {
+      content: '\e676';
+    }
+
+    .codicon-symbol-value:before {
+      content: '\e678';
+    }
+
+    .suggest-widget .monaco-list .monaco-list-row.focused .codicon {
+      color: var(--vscode-editorSuggestWidget-selectedIconForeground) !important;
+    }
+
+    .code-lens-decoration::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 4px;
+      width: 4px;
+      background-color: var(--success-color-6-normal);
+    }
+  }
+}

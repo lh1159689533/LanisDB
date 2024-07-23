@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import dayjs from 'dayjs';
 import AppBar from '@src/components/appBar';
-import SqlEditor from '@src/components/sqlEditor';
+import { SqlEditor } from '@src/components/MonacoEditor';
 import { IOperateItem } from '@src/types';
 import useAppState from '@src/hooks/useAppState';
 import DB from '@src/utils/db';
@@ -26,13 +26,14 @@ export default function SqlQueryEditor({ value, current, height }: ISqlQueryEdit
   const [sqlSelContent, setSqlSelContent] = useState('');
 
   const tabRef = useRef(null);
+  const sqlEditorRef = useRef(null);
 
   const tab = useTab('sqlQueryResult');
 
   const items: IOperateItem[] = [
     {
       key: 'run',
-      title: '执行',
+      title: sqlSelContent ? '执行选中' : '执行',
       icon: <RunIcon />,
       async handle() {
         const result = await db.execute(sqlSelContent || sqlContent);
@@ -45,25 +46,27 @@ export default function SqlQueryEditor({ value, current, height }: ISqlQueryEdit
         }
       },
     },
-    {
-      key: 'save',
-      title: '保存',
-      icon: <SaveIcon />,
-      async handle() {
-        console.log('saveing...');
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            console.log('saved');
-            resolve(null);
-          }, 6000);
-        });
-      },
-    },
+    // {
+    //   key: 'save',
+    //   title: '保存',
+    //   icon: <SaveIcon />,
+    //   async handle() {
+    //     console.log('saveing...');
+    //     await new Promise((resolve) => {
+    //       setTimeout(() => {
+    //         console.log('saved');
+    //         resolve(null);
+    //       }, 6000);
+    //     });
+    //   },
+    // },
     {
       key: 'format',
       title: '格式化',
       icon: <FormatIcon />,
-      handle() {},
+      handle() {
+        sqlEditorRef.current?.format();
+      },
     },
   ];
 
@@ -78,7 +81,7 @@ export default function SqlQueryEditor({ value, current, height }: ISqlQueryEdit
         columns: columns.map((item) => ({
           title: item.name,
           field: item.name,
-          type: convertColumnType(item.type)
+          type: convertColumnType(item.type),
         })),
         data,
       },
@@ -96,6 +99,22 @@ export default function SqlQueryEditor({ value, current, height }: ISqlQueryEdit
     setSqlSelContent(value);
   };
 
+  const onTableCompletion = async (dbName: string) => {
+    const tables = await db.getTables();
+    return tables.map((item) => ({ name: item.name, dbName }));
+  };
+
+  const onColumnCompletion = async (dbName: string, tblName: string) => {
+    const columns = await db.tableColumnsDetail(tblName);
+    return columns.map((item) => ({
+      dbName,
+      tblName,
+      name: item.name,
+      type: item.type,
+      description: item.columnComment,
+    }));
+  };
+
   useEffect(() => {
     height && setSqlEditorHeight(height - 48);
   }, [height]);
@@ -103,8 +122,15 @@ export default function SqlQueryEditor({ value, current, height }: ISqlQueryEdit
   return (
     <div ref={tabRef} role="tabpanel" hidden={value !== current} className="h-full">
       <Box sx={{ p: 0, height: '100%' }}>
-        <AppBar items={items} type='icon' />
-        <SqlEditor height={sqlEditorHeight} onChange={handleChange} onSelection={handleSelection} />
+        <AppBar items={items} type="icon" />
+        <SqlEditor
+          ref={sqlEditorRef}
+          onChange={handleChange}
+          onSelection={handleSelection}
+          style={{ height: sqlEditorHeight }}
+          onTableCompletion={onTableCompletion}
+          onColumnCompletion={onColumnCompletion}
+        />
       </Box>
     </div>
   );

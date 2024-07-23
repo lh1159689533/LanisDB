@@ -1,0 +1,51 @@
+.resize {
+  position: relative;
+  background: transparent;
+  right: 0;
+  top: 0;
+  z-index: 10;
+
+  &.is-dragging,
+  &:hover {
+    background-color: var(--brand-color-6-normal);
+  }
+}
+
+.col-resize {
+  width: 3px;
+  height: 100%;
+  right: -3px;
+}
+
+.row-resize {
+  height: 3px;
+  width: 100%;
+}
+
+.col-resize-default,
+.col-resize-min,
+.col-resize-max {
+  cursor: ew-resize;
+}
+
+.row-resize-default,
+.row-resize-min,
+.row-resize-max {
+  cursor: ns-resize;
+}
+
+// .row-resize-min {
+//   cursor: n-resize;
+// }
+
+// .row-resize-max {
+//   cursor: s-resize;
+// }
+
+// .col-resize-min {
+//   cursor: e-resize;
+// }
+
+// .col-resize-max {
+//   cursor: w-resize;
+// }
