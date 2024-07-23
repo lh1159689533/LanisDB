@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import Table from '@components/table';
 import AppBar from '@src/components/appBar';
 import { IPage } from '@src/types';
+import { SaveIcon, DeleteIcon, PlusIcon, RefreshIcon } from '@components/icons-lanis';
 
 interface IVirtualResultTable {
   current: string;
@@ -10,9 +11,7 @@ interface IVirtualResultTable {
   columns: any[];
   data: any[];
   tableType?: 'virtial' | 'page'; // virtial 虚拟滚动, page 分页
-  queryTableData?: (
-    page
-  ) => Promise<{ columns: any[]; data: any[]; total: number }>;
+  queryTableData?: (page) => Promise<{ columns: any[]; data: any[]; total: number }>;
   height?: number;
 }
 
@@ -22,6 +21,8 @@ export default function VirtualResultTable({
   queryTableData,
   tableType = 'page',
   height,
+  columns: columnList,
+  data,
 }: IVirtualResultTable) {
   const tableRef = useRef(null);
   const [tableScrollY, setTableScrollY] = useState(0);
@@ -33,20 +34,30 @@ export default function VirtualResultTable({
     {
       key: 'save',
       title: '保存',
-      icon: null,
+      icon: <SaveIcon />,
       handle() {},
     },
     {
       key: 'new',
       title: '新增',
-      icon: null,
-      handle() {},
+      icon: <PlusIcon />,
+      handle() {
+        tableRef.current.add();
+      },
     },
     {
       key: 'del',
       title: '删除',
-      icon: null,
+      icon: <DeleteIcon />,
       handle() {},
+    },
+    {
+      key: 'refresh',
+      title: '刷新',
+      icon: <RefreshIcon />,
+      async handle() {
+        await loadData();
+      },
     },
   ];
 
@@ -76,37 +87,31 @@ export default function VirtualResultTable({
   }, [height]);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (tableType === 'page') {
+      loadData();
+    }
+  }, [tableType]);
+
+  useEffect(() => {
+    if (tableType !== 'page') {
+      setColumns(columnList);
+      setDataSource(data);
+    }
+  }, [columnList, data]);
 
   return (
-    <div ref={tableRef} role="tabpanel" hidden={value !== current}>
+    <div role="tabpanel" hidden={value !== current}>
       <Box sx={{ p: 0, height: '100%' }}>
-        <AppBar items={items} />
+        <AppBar items={items} type="icon" />
         <div className="overflow-x-hidden">
           <Table
+            ref={tableRef}
             columns={columns}
             data={dataSource}
             height={tableScrollY}
             pagination={tableType === 'page' ? page : false}
             onPageChange={handlePageChange}
           />
-          {/* {tableType === 'virtial' ? (
-            <VirtualTable
-              columns={columns}
-              dataSource={dataSource}
-              scroll={{ y: tableScrollY }}
-              rowHeight={42}
-            />
-          ) : (
-            <Table
-              columns={columns}
-              data={dataSource}
-              scroll={{ y: tableScrollY }}
-              pagination={page}
-              onPageChange={handlePageChange}
-            />
-          )} */}
         </div>
       </Box>
     </div>

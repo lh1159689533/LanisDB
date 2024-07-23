@@ -4,14 +4,18 @@ import {
   ResizeRowsModule,
   ResizeColumnsModule,
   EditModule,
+  SelectRowModule,
+  FormatModule,
 } from 'tabulator-tables';
 import dayjs from 'dayjs';
 
-import './index.less'
+import './index.less';
 
-Tabulator.registerModule([ResizeRowsModule, ResizeColumnsModule, EditModule]);
+Tabulator.registerModule([ResizeRowsModule, ResizeColumnsModule, EditModule, SelectRowModule, FormatModule]);
 
-type ICusTableEditor = string | ((cell: any, onRendered: any, success: any, cancel: any, editorParams: any) => HTMLElement);
+type ICusTableEditor =
+  | string
+  | ((cell: any, onRendered: any, success: any, cancel: any, editorParams: any) => HTMLElement);
 
 interface ITabulatorProps {
   columns: any[];
@@ -20,7 +24,7 @@ interface ITabulatorProps {
 }
 
 export default function ({ columns, data, height }: ITabulatorProps) {
-  var dateEditor = function (cell, onRendered, success) {
+  const dateEditor = function (cell, onRendered, success) {
     var editor = document.createElement('input');
 
     editor.setAttribute('type', 'date');
@@ -123,16 +127,25 @@ export default function ({ columns, data, height }: ITabulatorProps) {
 
   const tableRef = useRef(null);
 
+  // 第一列的选择框
+  const selectable = {
+    formatter: 'rowSelection',
+    hozAlign: 'center',
+  };
+
   const getColumns = (columns: any[]) => {
-    const minWidth =
-      ((tableRef.current as HTMLElement).getBoundingClientRect()?.width - 20) /
-      columns.length;
+    const minWidth = ((tableRef.current as HTMLElement).getBoundingClientRect()?.width - 20) / columns.length;
     return columns.map((col) => {
       let editor: ICusTableEditor = 'input';
       if (col.type === 'date') {
         editor = dateEditor;
       }
-      return { ...col, minWidth: Math.max(minWidth, 100), editor };
+      delete col.type;
+      return {
+        ...col,
+        minWidth: Math.max(minWidth, 100),
+        editor,
+      };
     });
   };
 
@@ -142,9 +155,11 @@ export default function ({ columns, data, height }: ITabulatorProps) {
         maxHeight: height,
         layout: 'fitColumns',
         // resizableColumnFit: true,
-        columns: getColumns(columns),
+        columns: [selectable, ...getColumns(columns)],
         data,
         // resizableRows: true,
+        addRowPos: 'top',
+        selectable: 'highlight',
       });
     }
   }, [tableRef.current, height, columns]);

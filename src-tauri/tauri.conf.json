@@ -19,6 +19,9 @@
       },
       "path": {
         "all": true
+      },
+      "window": {
+        "setTitle": true
       }
     },
     "bundle": {

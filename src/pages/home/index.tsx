@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Button, Skeleton, IconButton, SpeedDial, SpeedDialIcon, SpeedDialAction } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { Add, MoreHoriz } from '@mui/icons-material';
+import { appWindow } from '@tauri-apps/api/window';
 import store from '@utils/store';
-import NewModal from './newModal';
 import DB from '@src/utils/db';
 import { IMysqlDBProps, ISqliteDBProps } from '@src/utils/db/types';
 import useAppState from '@src/hooks/useAppState';
@@ -12,6 +12,7 @@ import { ImportIcon, ExportIcon } from '@components/icons-lanis';
 import { db_connect_store_key } from '@src/constant';
 import useMessage from '@src/hooks/useMessage';
 import useConfirm from '@src/hooks/useConfirm';
+import NewModal from './newModal';
 
 import './index.less';
 
@@ -66,6 +67,7 @@ export default function Home() {
   const loadDB = async (props: IMysqlDBProps | ISqliteDBProps) => {
     const db = await DB.load(props);
     setDB(db);
+    (window as any).dbInstance = db;
   };
 
   /**
@@ -79,6 +81,8 @@ export default function Home() {
       const { file, dialect } = values;
       await loadDB({ storage: file, dialect });
     }
+
+    await appWindow.setTitle(`LanisDB - ${values.dialect}:${values.ip ?? values.file}`);
 
     history.push(`/datas/${values.dialect}`);
   };

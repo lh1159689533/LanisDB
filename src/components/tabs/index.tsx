@@ -15,10 +15,19 @@ interface ITabProps {
   height?: number;
 }
 
-const StyledTab = styled(Tab)(({ theme }) => ({
+const StyledTabList = styled(TabList)(() => ({
   '.MuiTabs-flexContainer': {
-    backgroundColor: '#fff'
+    backgroundColor: '#f9fafb',
+    minHeight: 32,
   },
+  '.MuiTabs-indicator': {
+    top: 0,
+    height: 1.5,
+    backgroundColor: 'var(--lanis-db-primary-color)'
+  },
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
   '&.MuiButtonBase-root': {
     marginLeft: 0,
     minHeight: 32,
@@ -52,7 +61,7 @@ const StyledTab = styled(Tab)(({ theme }) => ({
       },
     },
     '&.Mui-selected': {
-      color: '#6366f1',
+      color: '#333',
       backgroundColor: '#fff',
     },
     '&.Mui-selected.nosave .MuiSvgIcon-root': {
@@ -68,7 +77,7 @@ const StyledTab = styled(Tab)(({ theme }) => ({
   },
 }));
 
-export default function Tabs({ tabs, tabKey, height }: ITabProps) {
+export default function LTabs({ tabs, tabKey, height }: ITabProps) {
   const [value, setValue] = useState('');
 
   const tab = useTab(tabKey);
@@ -88,9 +97,9 @@ export default function Tabs({ tabs, tabKey, height }: ITabProps) {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       {tabs?.length && value ? (
-        <TabContext value={value} >
+        <TabContext value={value}>
           <Box sx={{ borderColor: 'divider' }}>
-            <TabList
+            <StyledTabList
               onChange={handleChange}
               sx={{ minHeight: 32, bgcolor: '#f9fafb' }}
               aria-label="tabs"
@@ -102,11 +111,7 @@ export default function Tabs({ tabs, tabKey, height }: ITabProps) {
                   key={tab.key}
                   label={
                     <Tooltip
-                      title={
-                        <span className="text-gray-600 text-xs">
-                          {tab.title}
-                        </span>
-                      }
+                      title={<span className="text-gray-600 text-xs">{tab.title}</span>}
                       arrow={false}
                       color="#fff"
                     >
@@ -116,6 +121,7 @@ export default function Tabs({ tabs, tabKey, height }: ITabProps) {
                   value={tab.key}
                   icon={
                     <CloseOutlined
+                      className='ml-2'
                       onClick={(e) => {
                         e.stopPropagation();
                         tab.onClose?.(tab.key);
@@ -125,20 +131,14 @@ export default function Tabs({ tabs, tabKey, height }: ITabProps) {
                   className={`${tab.saved ? '' : 'nosave'}`}
                 />
               ))}
-            </TabList>
+            </StyledTabList>
           </Box>
           <div style={{ height: 'calc(100% - 36px)' }} className="bg-white">
             {tabs.map((tab) => {
               const Module = tabComponents[tab.comp];
               return (
                 Module && (
-                  <Module
-                    key={tab.key}
-                    current={value}
-                    value={tab.key}
-                    height={height - 36}
-                    {...(tab.params ?? {})}
-                  />
+                  <Module key={tab.key} current={value} value={tab.key} height={height - 36} {...(tab.params ?? {})} />
                 )
               );
             })}

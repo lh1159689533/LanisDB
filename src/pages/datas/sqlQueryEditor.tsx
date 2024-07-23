@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
+import dayjs from 'dayjs';
 import AppBar from '@src/components/appBar';
 import SqlEditor from '@src/components/sqlEditor';
 import { IOperateItem } from '@src/types';
+import useAppState from '@src/hooks/useAppState';
+import DB from '@src/utils/db';
+import useTab from '@hooks/useTab';
+import { convertColumnType } from '@src/utils/db/utils';
+import { SaveIcon, RunIcon, FormatIcon } from '@components/icons-lanis';
 
 interface ISqlQueryEditor {
   current: string;
@@ -11,45 +17,94 @@ interface ISqlQueryEditor {
 }
 
 export default function SqlQueryEditor({ value, current, height }: ISqlQueryEditor) {
+  const [db] = useAppState<DB>('dbInstance');
+
   const [sqlEditorHeight, setSqlEditorHeight] = useState(0);
+  // sql编辑器内容
+  const [sqlContent, setSqlContent] = useState('');
+  // sql编辑器已选择内容
+  const [sqlSelContent, setSqlSelContent] = useState('');
 
   const tabRef = useRef(null);
+
+  const tab = useTab('sqlQueryResult');
 
   const items: IOperateItem[] = [
     {
       key: 'run',
       title: '执行',
-      icon: null,
-      handle() {},
+      icon: <RunIcon />,
+      async handle() {
+        const result = await db.execute(sqlSelContent || sqlContent);
+        if (result?.length) {
+          result.forEach((item) => {
+            if (item?.columns) {
+              showTableData(item.columns, item.data);
+            }
+          });
+        }
+      },
     },
     {
       key: 'save',
       title: '保存',
-      icon: null,
-      handle() {},
+      icon: <SaveIcon />,
+      async handle() {
+        console.log('saveing...');
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            console.log('saved');
+            resolve(null);
+          }, 6000);
+        });
+      },
     },
     {
       key: 'format',
       title: '格式化',
-      icon: null,
+      icon: <FormatIcon />,
       handle() {},
     },
   ];
+
+  const showTableData = (columns, data) => {
+    tab.add({
+      key: `result${dayjs().millisecond()}`,
+      title: '结果集',
+      saved: true,
+      comp: 'SqlQueryResult',
+      params: {
+        tableType: 'virtial',
+        columns: columns.map((item) => ({
+          title: item.name,
+          field: item.name,
+          type: convertColumnType(item.type)
+        })),
+        data,
+      },
+      onClose(key: string) {
+        tab.remove(key);
+      },
+    });
+  };
+
+  const handleChange = (value: string) => {
+    setSqlContent(value);
+  };
+
+  const handleSelection = (value: string) => {
+    setSqlSelContent(value);
+  };
 
   useEffect(() => {
     height && setSqlEditorHeight(height - 48);
   }, [height]);
 
   return (
-    <div
-      ref={tabRef}
-      role="tabpanel"
-      hidden={value !== current}
-      className="h-full"
-    >
+    <div ref={tabRef} role="tabpanel" hidden={value !== current} className="h-full">
       <Box sx={{ p: 0, height: '100%' }}>
-        <AppBar items={items} />
-        <SqlEditor height={sqlEditorHeight} />
+        <AppBar items={items} type='icon' />
+        <SqlEditor height={sqlEditorHeight} onChange={handleChange} onSelection={handleSelection} />
       </Box>
     </div>
   );

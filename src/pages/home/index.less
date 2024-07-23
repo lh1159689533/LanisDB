@@ -17,7 +17,11 @@
     }
 
     &.add {
-      @apply flex flex-col gap-2 justify-center items-center cursor-pointer hover:text-blue-500;
+      @apply flex flex-col gap-2 justify-center items-center cursor-pointer;
+
+      &:hover {
+        color: var(--lanis-db-primary-color);
+      }
     }
 
     &:hover {

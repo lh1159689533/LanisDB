@@ -4,13 +4,14 @@ import dayjs from 'dayjs';
 import { Tree, Select } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import { LoadingButton } from '@mui/lab';
-import { TableViewOutlined, ViewColumnOutlined } from '@mui/icons-material';
 import useTab from '@hooks/useTab';
 import { IPage } from '@src/types';
 import useAppState from '@src/hooks/useAppState';
 import DB from '@src/utils/db';
 import LanisMenu from '@src/components/menu';
+import { convertColumnType } from '@src/utils/db/utils';
 import ViewCreateSql from './components/viewCreateSql';
+import { TableIcon, ColumnIcon } from '@components/icons-lanis';
 
 import './index.less';
 
@@ -115,8 +116,9 @@ export default function Sidebar() {
     if (result) {
       return {
         columns: result.columns.map((item) => ({
-          title: item,
-          field: item,
+          title: item.name,
+          field: item.name,
+          type: convertColumnType(item.type)
         })),
         data: result.data,
         total: result.total,
@@ -184,19 +186,19 @@ export default function Sidebar() {
         return;
       }
       if (type === 'table') {
-        db.tableDetail(title).then((resp) => {
+        db.selectTableColumns(title).then((resp) => {
           const data = resp ?? [];
           setTreeData((origin) =>
             updateTreeData(origin, key, [
               {
                 key: `${title}-column-list`,
                 title: `字段（${data.length}）`,
-                icon: <ViewColumnOutlined />,
+                icon: <ColumnIcon />,
                 selectable: false,
-                children: data.map((item) => ({
-                  key: `column-${item.name}`,
-                  title: item.name,
-                  icon: <ViewColumnOutlined />,
+                children: data.map((name) => ({
+                  key: `column-${name}`,
+                  title: name,
+                  icon: <ColumnIcon />,
                   type: 'column',
                   children: null,
                   isLeaf: true,
@@ -226,24 +228,24 @@ export default function Sidebar() {
         {
           key: 'table-list',
           title: `表（${tables.length}）`,
-          icon: <TableViewOutlined />,
+          icon: <TableIcon />,
           selectable: false,
           children: tables.map((item) => ({
             key: `table-${item.name}`,
             title: item.name,
-            icon: <TableViewOutlined />,
+            icon: <TableIcon />,
             type: 'table',
           })),
         },
         {
           key: 'view-list',
           title: `视图（${views.length}）`,
-          icon: <TableViewOutlined />,
+          icon: <TableIcon />,
           selectable: false,
           children: views.map((item) => ({
             key: `view-${item.name}`,
             title: item.name,
-            icon: <TableViewOutlined />,
+            icon: <TableIcon />,
             type: 'view',
             isLeaf: true,
           })),
@@ -254,12 +256,12 @@ export default function Sidebar() {
         {
           key: 'table-list',
           title: `表（${datas.length}）`,
-          icon: <TableViewOutlined />,
+          icon: <TableIcon />,
           selectable: false,
           children: datas.map((item) => ({
             key: `table-${item.name}`,
             title: item.name,
-            icon: <TableViewOutlined />,
+            icon: <TableIcon />,
             type: 'table',
           })),
         },

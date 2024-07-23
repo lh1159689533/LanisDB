@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AddCardOutlined, NoteAddOutlined } from '@mui/icons-material';
 import dayjs from 'dayjs';
+import { appWindow } from '@tauri-apps/api/window';
 import Tabs from '@src/components/tabs';
 import useAppState from '@src/hooks/useAppState';
 import Header from './header';
@@ -33,9 +34,11 @@ export default function Datas() {
       key: 'newConnection',
       title: '新建连接',
       icon: <AddCardOutlined />,
-      handle() {
+      async handle() {
         db.close();
         history.push('/');
+
+        await appWindow.setTitle('LanisDB');
       },
     },
     {
@@ -98,7 +101,7 @@ export default function Datas() {
           <div className="sql-tabs">
             {sqlTabs?.length ? <Tabs tabs={sqlTabs} tabKey="sqlQuery" height={height - resultTabsHeight} /> : null}
           </div>
-          <div className="data-list border-t relative">
+          <div className="data-list relative">
             {sqlTabs?.length ? <Resize type="row" callback={onResize} max={height * 0.9} min={height * 0.3} /> : null}
             {resultTabs?.length ? <Tabs tabs={resultTabs} tabKey="sqlQueryResult" height={resultTabsHeight} /> : null}
           </div>

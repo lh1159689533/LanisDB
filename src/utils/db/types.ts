@@ -1,5 +1,5 @@
 // 方言
-export type IDialect = 'mysql' | 'sqlite' | 'sysdb';
+export type IDialect = 'mysql' | 'sqlite';
 
 // sqlite数据库DB构造参数
 export interface ISqliteDBProps {
@@ -23,8 +23,8 @@ export interface IQueryResult {
   lastInsertId: number; // 最新insert ID
 }
 
-// sqlite表详情
-export interface ISqliteTableDetail {
+// 表详情
+export interface ITableColumnsDetail {
   name: string;
   defaultValue: any;
   notNull: boolean;
@@ -33,26 +33,18 @@ export interface ISqliteTableDetail {
 }
 
 // mysql表详情
-export interface IMysqlTableDetail {
-  name: string;
-  defaultValue: any;
-  notNull: boolean;
-  primaryKey: boolean;
-  type: string;
-  columnComment: string;
-  characterName: string;
-  collationName: string;
+export interface IMysqlTableColumnsDetail extends ITableColumnsDetail {
+  columnComment?: string;
+  characterName?: string;
+  collationName?: string;
 }
 
 // select查询结果
 export interface ISelectResult {
-  columns: string[];
+  columns: IMysqlTableColumnsDetail[];
   data: any[];
   total?: number;
 }
 
 // DB构造参数
 export type IDBProps = ISqliteDBProps | IMysqlDBProps;
-
-// 表详情
-export type ITableDetail = ISqliteTableDetail | IMysqlTableDetail;

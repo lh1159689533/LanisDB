@@ -21,8 +21,6 @@ export default function useTab(tabKey: string) {
   };
 
   const remove = (key: string) => {
-    console.log(key)
-    console.log(JSON.stringify(tabsRef.current))
     let nextActiveKey = '';
     const index = tabsRef.current.findIndex((item) => item.key === key);
     if (index !== -1 && tabsRef.current[index].active) {
@@ -33,7 +31,6 @@ export default function useTab(tabKey: string) {
       }
     }
     tabsRef.current = tabsRef.current.filter((item) => item.key !== key);
-    console.log(JSON.stringify(tabsRef.current))
     active(nextActiveKey);
     setTabs(tabsRef.current);
   };

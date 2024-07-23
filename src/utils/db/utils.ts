@@ -61,3 +61,44 @@ export const getCountSql = (sql: string, tableName: string) => {
 };
 
 export const isSelectSql = (sql: string) => sql.trim().toLowerCase().startsWith('select ');
+
+// 将数据库字段类型转为js可以识别的类型，table列编辑时用
+export const convertColumnType = (columnType: string): string => {
+  if (columnType.startsWith('VARCHAR')) return 'string';
+  if (columnType.startsWith('INTEGER') || columnType.startsWith('BIGINT')) return 'number';
+
+  switch (columnType) {
+    case 'TEXT':
+    case 'REAL':
+    case 'CHAR':
+    case 'VARCHAR':
+    case 'TINYTEXT':
+    case 'MEDIUMTEXT':
+    case 'LONGTEXT':
+    case 'ENUM':
+    case 'FLOAT':
+    case 'DOUBLE':
+    case 'JSON':
+      return 'string';
+    case 'INTEGER':
+    case 'NUMERIC':
+    case 'TINYINT':
+    case 'SMALLINT':
+    case 'INT':
+    case 'MEDIUMINT':
+    case 'BIGINT':
+      return 'number';
+    case 'BOOLEAN':
+      return 'boolean';
+    case 'DATE':
+    case 'TIME':
+    case 'DATETIME':
+    case 'TIMESTAMP':
+      return 'date';
+    case 'BLOB':
+    case 'TINIYBLOB':
+    case 'MEDIUMBLOB':
+    case 'LONGBLOB':
+      return 'blob';
+  }
+};

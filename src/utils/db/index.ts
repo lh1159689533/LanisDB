@@ -4,10 +4,9 @@ import {
   IMysqlDBProps,
   IDBProps,
   IQueryResult,
-  ISqliteTableDetail,
-  IMysqlTableDetail,
+  ITableColumnsDetail,
+  IMysqlTableColumnsDetail,
   ISelectResult,
-  ITableDetail,
 } from './types';
 
 import { patternTableNameBySql, getDBUrl, getTableColumnsSql, getCountSql, isSelectSql } from './utils';
@@ -82,7 +81,12 @@ class DB {
     return await invoke<boolean>(`${this.prefix}load`, { url: this.url });
   }
 
-  private async selectTableColumns(invokeKey: string, tableName: string): Promise<string[]> {
+  /**
+   * 查询表字段名称集合
+   * @param tableName 表名
+   */
+  async selectTableColumns(tableName: string): Promise<string[]> {
+    const invokeKey = `${this.prefix}select`;
     const columns = await invoke<any[]>(invokeKey, {
       url: this.url,
       query: getTableColumnsSql(tableName, this.props.dialect, (this.props as IMysqlDBProps).database),
@@ -109,7 +113,8 @@ class DB {
       });
       const total = countResult?.[0]?.total;
 
-      const columns = await this.selectTableColumns(invokeKey, tableName);
+      // const columns = await this.selectTableColumns(invokeKey, tableName);
+      const columns = await this.tableColumnsDetail(tableName);
 
       return {
         columns,
@@ -128,7 +133,7 @@ class DB {
   async select(sql: string, hasColumns = true): Promise<any[] | ISelectResult> {
     const invokeKey = `${this.prefix}select`;
     if (hasColumns) {
-      const columns = await this.selectTableColumns(invokeKey, patternTableNameBySql(sql));
+      const columns = await this.tableColumnsDetail(patternTableNameBySql(sql));
       const data = await invoke<any[]>(invokeKey, {
         url: this.url,
         query: sql,
@@ -158,10 +163,10 @@ class DB {
    * @param sql sql语句，多条分号分隔
    */
   @tryCatch
-  execute(sql: string): Promise<any[] | ISelectResult> {
+  execute(sql: string): Promise<any[] | ISelectResult[]> {
     const sqlList = sql.split(';');
     const promises = [];
-    sqlList.forEach((s) => {
+    sqlList.filter(item => !!item).forEach((s) => {
       if (isSelectSql(s)) {
         promises.push(this.select(s));
       } else {
@@ -173,10 +178,10 @@ class DB {
   }
 
   /**
-   * 查询sqlite表详情
+   * 查询sqlite表字段详情
    * @param tableName 表名
    */
-  private async tableDetail_sqlite(tableName: string): Promise<ISqliteTableDetail[]> {
+  private async tableColumnsDetail_sqlite(tableName: string): Promise<ITableColumnsDetail[]> {
     const result = (await this.select(getTableColumnsSql(tableName, 'sqlite'), false)) as any[];
     if (result?.length) {
       return result.map(({ name, dflt_value, notnull, pk, type }) => ({
@@ -191,10 +196,10 @@ class DB {
   }
 
   /**
-   * 查询mysql表详情
+   * 查询mysql表字段详情
    * @param tableName 表名
    */
-  private async tableDetail_mysql(tableName: string): Promise<IMysqlTableDetail[]> {
+  private async tableColumnsDetail_mysql(tableName: string): Promise<IMysqlTableColumnsDetail[]> {
     const result = (await this.select(
       getTableColumnsSql(tableName, 'mysql', (this.props as IMysqlDBProps).database),
       false
@@ -217,16 +222,16 @@ class DB {
   }
 
   /**
-   * 查询表详情
+   * 查询表字段详情
    * @param tableName 表名
    */
   @tryCatch
-  tableDetail(tableName: string): Promise<ITableDetail[]> {
+  tableColumnsDetail(tableName: string): Promise<IMysqlTableColumnsDetail[]> {
     const { dialect } = this.props;
     if (dialect === 'mysql') {
-      return this.tableDetail_mysql(tableName);
+      return this.tableColumnsDetail_mysql(tableName);
     } else {
-      return this.tableDetail_sqlite(tableName);
+      return this.tableColumnsDetail_sqlite(tableName);
     }
   }
 

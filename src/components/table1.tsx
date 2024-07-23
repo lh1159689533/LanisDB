@@ -8,7 +8,7 @@ const CusPagination = styled(({ ...props }: PaginationProps) => (
   <Pagination {...props} />
 ))(() => ({
   [`& .${paginationClasses.ul} > li > .Mui-selected.MuiPaginationItem-page`]: {
-    backgroundColor: '#818cf8',
+    backgroundColor: 'var(--lanis-db-primary-color)',
     color: '#fff',
   },
 }));

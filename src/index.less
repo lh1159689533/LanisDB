@@ -7,9 +7,71 @@
   box-sizing: border-box;
 }
 
+:root {
+  --lanis-db-primary-color: rgb(0, 150, 136);
+  --lanis-db-primary-hover-color-1: rgba(0, 150, 136, 0.1);
+  --lanis-db-primary-hover-color-2: rgba(0, 150, 136, 0.2);
+  --lanis-db-primary-hover-color-3: rgba(0, 150, 136, 0.3);
+  --lanis-db-primary-hover-color-4: rgba(0, 150, 136, 0.4);
+  --lanis-db-primary-hover-color-5: rgba(0, 150, 136, 0.5);
+  --lanis-db-primary-hover-color-6: rgba(0, 150, 136, 0.6);
+  --lanis-db-primary-hover-color-7: rgba(0, 150, 136, 0.7);
+  --lanis-db-primary-hover-color-8: rgba(0, 150, 136, 0.8);
+  --lanis-db-primary-hover-color-9: rgba(0, 150, 136, 0.9);
+  --lanis-db-primary-hover-color: rgba(0, 150, 136, 1);
+}
+
 html {
   font-size: 14px;
   background-color: #f3f4f6;
+}
+
+// .MuiButton-containedPrimary {
+//   background-color: var(--lanis-db-primary-color) !important;
+// }
+
+// .MuiButton-outlinedPrimary, .MuiButton-outlinedPrimary:hover {
+//   color: var(--lanis-db-primary-color) !important;
+//   border: 1px solid var(--lanis-db-primary-hover-color) !important;
+// }
+
+// Mui样式重写
+.MuiButton-textPrimary {
+  color: var(--lanis-db-primary-color) !important;
+
+  &:hover {
+    background-color: var(--lanis-db-primary-hover-color-1) !important;
+  }
+}
+
+.MuiButton-outlinedPrimary:not(.MuiLoadingButton-loading) {
+  color: var(--lanis-db-primary-color) !important;
+  border-color: var(--lanis-db-primary-color);
+
+  &:hover {
+    border-color: var(--lanis-db-primary-color);
+    background-color: var(--lanis-db-primary-hover-color-1);
+  }
+}
+
+.MuiButton-containedPrimary:not(.MuiLoadingButton-loading) {
+  background-color: var(--lanis-db-primary-color) !important;
+
+  &:hover {
+    background-color: var(--lanis-db-primary-hover-color-9) !important;
+  }
+}
+
+.css-1c2i806-MuiFormLabel-root-MuiInputLabel-root.Mui-focused {
+  color: var(--lanis-db-primary-color) !important;
+}
+
+.css-l4u8b9-MuiInputBase-root-MuiInput-root:after {
+  border-bottom-color: var(--lanis-db-primary-color) !important;
+}
+
+.lanis-icon:hover {
+  color: var(--lanis-db-primary-color) !important;
 }
 
 ::-webkit-scrollbar {
@@ -32,4 +94,18 @@ html {
 ::-webkit-scrollbar-track {
   box-shadow: none;
   border-radius: 2px;
+}
+
+.spin {
+  animation: spin 0.6s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotateZ(0);
+  }
+  from {
+    transform: rotateZ(360deg);
+  }
 }

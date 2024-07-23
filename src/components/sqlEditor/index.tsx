@@ -9,24 +9,13 @@ interface ISqlEditor {
   readOnly?: boolean;
   style?: CSSProperties;
   onChange?: (value: string) => void;
+  onSelection?: (value: string) => void;
 }
 
-export default function SqlEditor({ value = '', height, readOnly = false, style, onChange }: ISqlEditor) {
-  const handleChange = (value: string | undefined) => {
-    onChange?.(value ?? '');
-  };
-
-  const handleSelection = () => {};
-
+export default function SqlEditor({ value = '', height, readOnly = false, style, onChange, onSelection }: ISqlEditor) {
   return (
     <div className="sql-editor" style={{ ...(style ?? {}), height }}>
-      <MonacoEditor
-        value={value}
-        language="sql"
-        readOnly={readOnly}
-        onChange={handleChange}
-        onSelection={handleSelection}
-      />
+      <MonacoEditor value={value} language="sql" readOnly={readOnly} onChange={onChange} onSelection={onSelection} />
     </div>
   );
 }
