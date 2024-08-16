@@ -1,3 +1,4 @@
+import { DIALECT } from '@src/constant';
 import { IDialect, ISqliteDBProps, IMysqlDBProps, IDBProps } from './types';
 
 // sql语句中匹配表名
@@ -14,7 +15,7 @@ export const patternTableNameBySql = (sql: string) => {
  */
 export const getDBUrl = (props: IDBProps) => {
   let url: string = '';
-  if (props.dialect === 'mysql') {
+  if (props.dialect === DIALECT.mysql) {
     const { host, port, username, password, database } = props as IMysqlDBProps;
     url = `mysql://${username}:${password}@${host}:${port}`;
     if (database) {
@@ -34,9 +35,9 @@ export const getDBUrl = (props: IDBProps) => {
  * @param dialect 数据库方言
  * @param database 数据库名
  */
-export const getTableColumnsSql = (tableName: string, dialect: IDialect = 'sqlite', database?: string) => {
+export const getTableColumnsSql = (tableName: string, dialect: IDialect = DIALECT.sqlite, database?: string) => {
   let sql = '';
-  if (dialect === 'mysql') {
+  if (dialect === DIALECT.mysql) {
     sql = `select column_name as name, column_default as defaultValue, is_nullable as notNull, column_type as type, character_set_name as characterName,
       collation_name as collationName, column_comment as columnComment, column_key as columnKey from information_schema.columns
       where table_schema='${database}' and table_name='${tableName}'`;

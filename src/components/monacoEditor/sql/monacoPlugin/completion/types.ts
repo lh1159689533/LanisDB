@@ -1,4 +1,4 @@
-import { IToken } from 'syntax-parser';
+import { IToken } from '../../../syntaxParser';
 
 export type IStatements = IStatement[];
 

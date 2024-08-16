@@ -4,6 +4,7 @@ import MonacoEditor from './monacoEditor';
 import { Contextmenu } from './common/types';
 
 import './log/log.contribution';
+import './styles/index.less';
 
 interface IMonacoLog {
   /** 日志内容 */

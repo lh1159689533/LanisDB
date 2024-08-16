@@ -1,5 +1,7 @@
+import { DIALECT } from '@src/constant';
+
 // 方言
-export type IDialect = 'mysql' | 'sqlite';
+export type IDialect = keyof typeof DIALECT;
 
 // sqlite数据库DB构造参数
 export interface ISqliteDBProps {

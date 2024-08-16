@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Skeleton, IconButton, SpeedDial, SpeedDialIcon, SpeedDialAction } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { Add, MoreHoriz } from '@mui/icons-material';
@@ -7,9 +7,9 @@ import store from '@utils/store';
 import DB from '@src/utils/db';
 import { IMysqlDBProps, ISqliteDBProps } from '@src/utils/db/types';
 import useAppState from '@src/hooks/useAppState';
-import LanisMenu from '@src/components/menu';
+import LanisMenu from '@src/components/Menu';
 import { ImportIcon, ExportIcon } from '@components/icons-lanis';
-import { db_connect_store_key } from '@src/constant';
+import { DB_CONNECT_STORE_KEY, DIALECT } from '@src/constant';
 import useMessage from '@src/hooks/useMessage';
 import useConfirm from '@src/hooks/useConfirm';
 import NewModal from './newModal';
@@ -46,10 +46,10 @@ export default function Home() {
   const [editConnect, setEditConnect] = useState(null);
   // 加载连接
   const [loading, setLoading] = useState(false);
-  // 更多按钮挂载节点
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   // 当前点击...按钮的连接
   const [currentDBConnect, setCurrentDBConnect] = useState(null);
+
+  const menuRef = useRef(null);
 
   const [, setDB] = useAppState<DB>('dbInstance');
 
@@ -74,10 +74,10 @@ export default function Home() {
    * 建立连接
    */
   const handleConnect = async (values) => {
-    if (values.dialect === 'mysql') {
+    if (values.dialect === DIALECT.mysql) {
       const { ip, port, username, password, dialect } = values;
       await loadDB({ host: ip, port, username, password, dialect });
-    } else if (values.dialect === 'sqlite') {
+    } else if (values.dialect === DIALECT.sqlite) {
       const { file, dialect } = values;
       await loadDB({ storage: file, dialect });
     }
@@ -93,16 +93,16 @@ export default function Home() {
   const saveDBConnect = async (values) => {
     try {
       let default_name = '';
-      if (values.dialect === 'mysql') {
+      if (values.dialect === DIALECT.mysql) {
         default_name = values.ip;
-      } else if (values.dialect === 'sqlite') {
+      } else if (values.dialect === DIALECT.sqlite) {
         default_name = values.file.split('/').reverse()[0];
       }
       const newValues = { ...values, name: values.name || default_name };
       if (modalType === 'edit') {
         newValues.id = editConnect.id;
       }
-      await store.addItem(db_connect_store_key, newValues);
+      await store.addItem(DB_CONNECT_STORE_KEY, newValues);
       message.success('保存成功');
       getDBConnectData();
       setModalType('');
@@ -135,7 +135,7 @@ export default function Home() {
     if (result?.length) {
       setDBConnectList(
         result.map((item) => {
-          const aliasName = item.dialect === 'mysql' ? item.ip : item.file?.split('/').reverse()[0];
+          const aliasName = item.dialect === DIALECT.mysql ? item.ip : item.file?.split('/').reverse()[0];
           return {
             ...item,
             name: item.name ?? aliasName,
@@ -154,23 +154,21 @@ export default function Home() {
    */
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>, dbConnect) => {
     setCurrentDBConnect(dbConnect);
-    setTimeout(() => {
-      setAnchorEl(event.target as HTMLElement);
-    }, 0);
+    menuRef.current?.show(event);
   };
 
   /**
-   *
-   * @param key
+   * 菜单ID
+   * @param id
    */
-  const handleMoreClick = async (key: string) => {
-    if (key === 'del') {
+  const handleMoreClick = async (id: string) => {
+    if (id === 'delete') {
       confirm({
         title: '删除连接',
         description: `确定删除连接${currentDBConnect.name}吗？`,
         async onOk() {
           try {
-            await store.delItem(db_connect_store_key, currentDBConnect.id);
+            await store.delItem(DB_CONNECT_STORE_KEY, currentDBConnect.id);
             getDBConnectData();
             message.success('删除成功');
           } catch {
@@ -179,11 +177,6 @@ export default function Home() {
         },
       });
     }
-  };
-
-  const handleMoreClose = () => {
-    setAnchorEl(null);
-    setCurrentDBConnect(null);
   };
 
   /**
@@ -224,13 +217,12 @@ export default function Home() {
                     <MoreHoriz />
                   </IconButton>
                   <LanisMenu
-                    open={Boolean(anchorEl)}
-                    anchorEl={anchorEl}
+                    id="db_connect_list__rightmenu"
+                    ref={menuRef}
                     menus={[
-                      { key: 'del', title: '删除' },
-                      { key: 'top', title: '置顶' },
+                      { id: 'delete', label: '删除' },
+                      { id: 'top', label: '置顶' },
                     ]}
-                    onClose={handleMoreClose}
                     onMenuClick={(key: string) => handleMoreClick(key)}
                   />
                 </div>

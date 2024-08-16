@@ -1,5 +1,5 @@
-import { IToken } from 'syntax-parser';
 import { get, isArray, flatten, has } from 'lodash';
+import { IToken } from '../../../syntaxParser';
 import {
   ICompletionItem,
   ICursorInfo,

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { TextField, MenuItem } from '@mui/material';
 import { Form } from 'antd';
-// import { homeDir, resolve } from '@tauri-apps/api/path';
 import Dialog from '@components/dialog';
 import { IDialect } from '@src/utils/db/types';
+import { DIALECT } from '@src/constant';
 import MysqlForm from './mysqlForm';
 import SqliteForm from './sqliteForm';
 
-const dialectList: IDialect[] = ['mysql', 'sqlite'];
+const dialectList: IDialect[] = Object.values(DIALECT) as IDialect[];
 
 interface IConfirmValues {
   dialect: string;
@@ -26,7 +26,7 @@ interface INewConnectModal {
 }
 
 const DEFAULT_DATA = {
-  dialect: 'mysql',
+  dialect: DIALECT.mysql,
   ip: '',
   port: '',
   username: '',
@@ -39,12 +39,12 @@ const DEFAULT_DATA = {
 export default function NewConnectModal({ open, data, onConfirm, onClose }: INewConnectModal) {
   const [form] = Form.useForm();
 
-  const [dialect, setDialect] = useState<IDialect>('mysql');
+  const [dialect, setDialect] = useState<IDialect>(DIALECT.mysql);
   const [initialValues, setInitialValues] = useState(DEFAULT_DATA);
 
   const reset = () => {
     form.resetFields();
-    setDialect('mysql');
+    setDialect(DIALECT.mysql);
     setInitialValues(DEFAULT_DATA);
   };
 
@@ -96,7 +96,7 @@ export default function NewConnectModal({ open, data, onConfirm, onClose }: INew
       title: '测试连接',
       primary: true,
       handle: handleTestConnect,
-      visible: dialect === 'mysql',
+      visible: dialect === DIALECT.mysql,
     },
     {
       title: '连接',
@@ -131,7 +131,7 @@ export default function NewConnectModal({ open, data, onConfirm, onClose }: INew
   useEffect(() => {
     if (data) {
       setInitialValues(data);
-      setDialect(data.dialect ?? 'mysql');
+      setDialect(data.dialect ?? DIALECT.mysql);
       form.setFieldsValue(data);
     }
   }, [data]);
@@ -179,7 +179,7 @@ export default function NewConnectModal({ open, data, onConfirm, onClose }: INew
             ))}
           </TextField>
         </Form.Item>
-        {dialect === 'mysql' ? <MysqlForm /> : <SqliteForm />}
+        {dialect === DIALECT.mysql ? <MysqlForm /> : <SqliteForm />}
       </Form>
     </Dialog>
   );

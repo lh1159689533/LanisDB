@@ -1,8 +1,9 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import * as React from 'react';
 import { useEffect, useMemo, useRef } from 'react';
 import { MonacoDiffEditorProps } from './common/types';
 import { getTheme } from './common/util';
+
+import './styles/index.less';
 
 function processSize(size: number | string) {
   return !/^\d+$/.test(size as string) ? size : `${size}px`;

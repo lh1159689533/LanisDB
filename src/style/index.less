@@ -13,54 +13,78 @@
 html {
   font-size: 14px;
   background-color: #f3f4f6;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
 }
 
-// .MuiButton-containedPrimary {
-//   background-color: var(--lanis-db-primary-color) !important;
-// }
-
-// .MuiButton-outlinedPrimary, .MuiButton-outlinedPrimary:hover {
-//   color: var(--lanis-db-primary-color) !important;
-//   border: 1px solid var(--lanis-db-primary-hover-color) !important;
-// }
+.titlebar {
+  height: 30px;
+  background: #329ea3;
+  user-select: none;
+  display: flex;
+  justify-content: flex-end;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.titlebar-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+}
+.titlebar-button:hover {
+  background: #5bbec3;
+}
 
 // Mui样式重写
-.MuiButton-textPrimary {
-  color: var(--lanis-db-primary-color) !important;
+// .MuiButton-textPrimary {
+//   color: var(--lanis-db-primary-color) !important;
 
-  &:hover {
-    background-color: var(--lanis-db-primary-hover-color-1) !important;
-  }
+//   &:hover {
+//     background-color: var(--lanis-db-primary-hover-color-1) !important;
+//   }
+// }
+
+// .MuiButton-outlinedPrimary:not(.MuiLoadingButton-loading) {
+//   color: var(--lanis-db-primary-color) !important;
+//   border-color: var(--lanis-db-primary-color);
+
+//   &:hover {
+//     border-color: var(--lanis-db-primary-color);
+//     background-color: var(--lanis-db-primary-hover-color-1);
+//   }
+// }
+
+// .MuiButton-containedPrimary:not(.MuiLoadingButton-loading) {
+//   background-color: var(--lanis-db-primary-color) !important;
+
+//   &:hover {
+//     background-color: var(--lanis-db-primary-hover-color-9) !important;
+//   }
+// }
+
+// .css-1c2i806-MuiFormLabel-root-MuiInputLabel-root.Mui-focused {
+//   color: var(--lanis-db-primary-color) !important;
+// }
+
+// .css-l4u8b9-MuiInputBase-root-MuiInput-root:after {
+//   border-bottom-color: var(--lanis-db-primary-color) !important;
+// }
+
+// .lanis-icon:hover {
+//   color: var(--lanis-db-primary-color) !important;
+// }
+
+.ant-popover {
+  font-size: 12px !important;
 }
 
-.MuiButton-outlinedPrimary:not(.MuiLoadingButton-loading) {
-  color: var(--lanis-db-primary-color) !important;
-  border-color: var(--lanis-db-primary-color);
-
-  &:hover {
-    border-color: var(--lanis-db-primary-color);
-    background-color: var(--lanis-db-primary-hover-color-1);
-  }
-}
-
-.MuiButton-containedPrimary:not(.MuiLoadingButton-loading) {
-  background-color: var(--lanis-db-primary-color) !important;
-
-  &:hover {
-    background-color: var(--lanis-db-primary-hover-color-9) !important;
-  }
-}
-
-.css-1c2i806-MuiFormLabel-root-MuiInputLabel-root.Mui-focused {
-  color: var(--lanis-db-primary-color) !important;
-}
-
-.css-l4u8b9-MuiInputBase-root-MuiInput-root:after {
-  border-bottom-color: var(--lanis-db-primary-color) !important;
-}
-
-.lanis-icon:hover {
-  color: var(--lanis-db-primary-color) !important;
+.ant-tree-node-content-wrapper {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 ::-webkit-scrollbar {

@@ -67,6 +67,7 @@ export default forwardRef<any, ICusTable>(
 
     const tableInstance = useRef(null);
     const tableRef = useRef(null);
+    const updateHeightTimerRef = useRef(null);
 
     useImperativeHandle(ref, () => ({
       add() {
@@ -155,7 +156,10 @@ export default forwardRef<any, ICusTable>(
 
     useEffect(() => {
       if (tableInstance.current?.initialized) {
-        tableInstance.current.setHeight(height);
+        clearTimeout(updateHeightTimerRef.current);
+        updateHeightTimerRef.current = setTimeout(() => {
+          tableInstance.current.setHeight(height);
+        }, 500);
       }
     }, [height]);
 

@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { groupBy } from 'lodash';
-import { IParseResult } from 'syntax-parser';
-import { getDatabaseList, getTableListByDbName, getColumnsByDbNameAndTableName } from '../../common/util';
+import { IParseResult } from '../../syntaxParser';
+import { getTableListByDbName, getColumnsByDbNameAndTableName, getFunctions } from '../../common/util';
 import snippet from './snippet';
 import { sqlParser, reader } from './completion';
 import { ITableInfo, ICursorInfo } from './completion/types';
@@ -149,8 +149,6 @@ const KEYWORDS = [
   'YEAR',
 ];
 
-const FUNCTIONS = ['SUBSTRING', 'TRIM', 'REPLACE', 'COUNT', 'SUM'];
-
 /**
  * 关键字Suggestions
  */
@@ -169,8 +167,10 @@ const getKeywordSuggestions = (nextMatchings: string[]): any[] => {
 /**
  * 快捷语法
  */
-const getFastSuggestions = (nextMatchings: string[]) =>
-  snippet
+const getFastSuggestions = async (modelId: string, nextMatchings: string[]) => {
+  const functions = await getFunctions(modelId);
+
+  return snippet
     .filter((item) => nextMatchings.includes(item.category))
     .map(({ label, insertText }) => ({
       label,
@@ -178,7 +178,17 @@ const getFastSuggestions = (nextMatchings: string[]) =>
       insertText,
       insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
       sortText: `AC${insertText}`,
-    }));
+    }))
+    .concat(
+      functions.map((item) => ({
+        label: item.name,
+        kind: CompletionItemKind.Snippet,
+        insertText: item.snippet,
+        insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+        sortText: `AC${item.snippet}`,
+      }))
+    );
+};
 
 const onSuggestTableFields = async (modelId: string, tableInfo?: ITableInfo): Promise<any> => {
   const columns = await getColumnsByDbNameAndTableName(
@@ -194,26 +204,24 @@ const onSuggestTableFields = async (modelId: string, tableInfo?: ITableInfo): Pr
       kind: CompletionItemKind.Text,
       detail: item.type ?? '',
       documentation: {
-        value: `
-    数据库: ${item.dbName}
-    表: ${item.tblName}
-    说明: ${item.description}`,
+        value: `数据库: ${item.dbName ?? ''}\n\n表: ${item.tblName ?? ''}\n\n说明: ${item.description ?? ''}`,
       },
     };
   });
 };
 
-const onSuggestFunctionName = (): Promise<any[]> => {
-  return Promise.resolve(
-    FUNCTIONS.map((each) => {
-      return {
-        label: each,
-        insertText: each,
-        sortText: `B${each}`,
-        kind: CompletionItemKind.Function,
-      };
-    })
-  );
+const onSuggestFunctionName = async (modelId: string): Promise<any[]> => {
+  const functions = await getFunctions(modelId);
+  return functions.map((item) => ({
+    label: item.name,
+    insertText: item.name,
+    sortText: `B${item.name}`,
+    kind: CompletionItemKind.Function,
+    detail: '函数',
+    documentation: {
+      value: `说明: ${item.desc ?? ''}\n\n用法: ${item.usage ?? ''}`,
+    },
+  }));
 };
 
 const onSuggestFieldGroup = (tableNameOrAlias?: string): any => {
@@ -227,16 +235,6 @@ const onSuggestFieldGroup = (tableNameOrAlias?: string): any => {
 };
 
 const onSuggestTableNames = async (modelId: string, cursorInfo: any): Promise<any[]> => {
-  // if (!cursorInfo.tableInfo?.namespace?.value) {
-  //   const dbNames = await getDatabaseList(modelId);
-  //   return dbNames.map((name) => ({
-  //     label: name,
-  //     insertText: name,
-  //     sortText: `AA${name}`,
-  //     kind: CompletionItemKind.Constructor,
-  //     detail: '库',
-  //   }));
-  // }
   const tableNames = await getTableListByDbName(modelId, cursorInfo.tableInfo.namespace.value);
   return tableNames.map((item) => {
     return {
@@ -256,18 +254,16 @@ export const provideCompletionItems = async (
   position: monaco.Position
 ): Promise<any> => {
   const parseResult: IParseResult = await sqlParser(model.getValue(), model.getOffsetAt(position));
-  console.log('parseResult:', parseResult);
 
   const cursorInfo = await reader.getCursorInfo(parseResult.ast, parseResult.cursorKeyPath);
-  console.log('cursorInfo:', cursorInfo);
 
   const nextMatchings = parseResult.nextMatchings
     .filter((item) => item.type === 'string')
     .map((item) => item.value as string);
 
   const keywordSuggestions = getKeywordSuggestions(nextMatchings);
-  const functionNames = await onSuggestFunctionName();
-  const fastSuggestions = await getFastSuggestions(nextMatchings);
+  const functionNames = await onSuggestFunctionName(model.id);
+  const fastSuggestions = await getFastSuggestions(model.id, nextMatchings);
 
   if (!cursorInfo) {
     return { suggestions: keywordSuggestions.concat(fastSuggestions) };

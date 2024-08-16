@@ -30,6 +30,7 @@
     "monaco-editor": "^0.41.0",
     "notistack": "^3.0.1",
     "pg-hstore": "^2.3.4",
+    "react-contexify": "^6.0.0",
     "react-final-form": "^6.5.9",
     "react-redux": "^8.1.1",
     "react-tabulator": "^0.18.1",
@@ -37,7 +38,6 @@
     "react-window": "^1.8.9",
     "redux": "^4.2.1",
     "sequelize": "^7.0.0-alpha2.1",
-    "syntax-parser": "^1.0.18",
     "tabulator-tables": "^5.5.1"
   },
   "devDependencies": {

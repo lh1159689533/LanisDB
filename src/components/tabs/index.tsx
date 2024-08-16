@@ -1,149 +1,152 @@
-import { useEffect, useState } from 'react';
-import { Box, Tab } from '@mui/material';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import { CloseOutlined } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-import useTab from '@hooks/useTab';
-import { Tooltip } from 'antd';
-import { tabComponents } from './components';
-import { ITab } from '@src/types';
+import React, { useMemo } from 'react';
+import { PopoverProps } from 'antd';
+import Tab from './tab';
+import More from './more';
+import { ITabData } from './types';
 
-interface ITabProps {
-  tabs: ITab[];
-  tabKey: string; // 同一组tab必须相同
-  height?: number;
+import './index.less';
+
+export * from './types';
+export { default as Tab } from './tab';
+export { default as TabContent } from './tabContent';
+
+interface IMenu {
+  id: string;
+  label: string;
+  callback: (tabId: string) => void;
 }
 
-const StyledTabList = styled(TabList)(() => ({
-  '.MuiTabs-flexContainer': {
-    minHeight: 32,
-  },
-  '.MuiTabs-indicator': {
-    top: 0,
-    height: 1.5,
-    backgroundColor: 'var(--lanis-db-primary-color)',
-  },
-}));
+interface IOperate {
+  id: string;
+  icon: any;
+  callback: () => void;
+}
 
-const StyledTab = styled(Tab)(({ theme }) => ({
-  '&.MuiButtonBase-root': {
-    marginLeft: 0,
-    minHeight: 32,
-    maxWidth: 160,
-    paddingTop: theme.spacing(1.2),
-    paddingBottom: theme.spacing(1.2),
-    textTransform: 'none',
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    borderRight: '1px solid #e5e7eb',
-    '&:nth-of-type(1)': {
-      borderLeft: '1px solid #e5e7eb',
-      borderRight: '1px solid #e5e7eb',
-    },
-    '& .MuiSvgIcon-root': {
-      marginBottom: 0,
-      fontSize: '0.9rem',
-    },
-    '&.nosave .MuiSvgIcon-root': {
-      marginBottom: 0,
-      fontSize: '.5rem',
-      color: 'transparent',
-      backgroundColor: '#6b7280',
-      borderRadius: '50%',
-      marginRight: 2,
-      '&:hover': {
-        color: 'inherit',
-        backgroundColor: 'transparent',
-        fontSize: '.9rem',
-        marginRight: 0,
-      },
-    },
-    '&.Mui-selected': {
-      color: '#333',
-      backgroundColor: '#fff',
-    },
-    '&.Mui-selected.nosave .MuiSvgIcon-root': {
-      backgroundColor: '#6366f1',
-      marginBottom: 0,
-      fontSize: '0.5rem',
-      '&:hover': {
-        color: 'inherit',
-        backgroundColor: 'transparent',
-        fontSize: '0.9rem',
-      },
-    },
-  },
-}));
+interface ITabs {
+  /** 当前激活tab id */
+  activeId: ITabData['id'];
+  /** tab */
+  tabs: ITabData[];
+  style?: React.CSSProperties;
+  className?: string;
+  /** tab bar的className */
+  tabClassName?: string;
+  /** 更多下拉className */
+  boxClassName?: string;
+  /** 操作 */
+  operates?: IOperate[];
+  /** 右键菜单 */
+  menus?: IMenu[] | ((tabId: string) => IMenu[]);
+  /** tab bar Bubble提示配置 */
+  bubbleProps?: Omit<PopoverProps, 'content'>;
+  /** 是否可编辑tab名称，默认false */
+  editable?: boolean;
+  children?: React.ReactNode | ((activeId: string) => React.ReactNode);
+  /**
+   * 关闭tab
+   * @param tabId tab id
+   */
+  onTabClose?: (tabId: string) => void;
+  /**
+   * 点击激活tab
+   * @param tabId tab id
+   */
+  onTabClick: (tabId: string) => void;
+  /**
+   * 修改tab名称
+   * @param tabId tab id
+   * @param newName 新名称
+   */
+  onTabRename?: (tabId: string, newName: string) => Promise<void>;
+  onTabContextMenu?: (e: React.MouseEvent, tabId: string) => void;
+}
 
-export default function LTabs({ tabs, tabKey, height }: ITabProps) {
-  const [value, setValue] = useState('');
-
-  const tab = useTab(tabKey);
-
-  const handleChange = (_, newValue: string) => {
-    tab.active(newValue);
-    setValue(newValue);
-  };
-
-  useEffect(() => {
-    if (tabs?.length) {
-      const activeTab = tabs.find((tab) => tab.active);
-      setValue(activeTab?.key);
-    }
-  }, [tabs]);
+/**
+ * 数据探索运行记录，以tab的形式展示，包括查询记录列表、子查询记录详情
+ */
+export default function Tabs({
+  activeId,
+  tabs,
+  style,
+  className = '',
+  tabClassName = '',
+  boxClassName = '',
+  children,
+  operates,
+  bubbleProps,
+  editable = false,
+  onTabRename,
+  onTabClose,
+  onTabClick,
+  onTabContextMenu,
+}: ITabs) {
+  /** 更多下拉 */
+  const moreTabs = useMemo(() => tabs.filter((item) => !item.hideInMore), [tabs]);
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      {tabs?.length && value ? (
-        <TabContext value={value}>
-          <Box sx={{ borderColor: 'divider' }}>
-            <StyledTabList
-              onChange={handleChange}
-              sx={{ minHeight: 32, bgcolor: 'var(--lanis-db-bg-color-tab-bar)' }}
-              aria-label="tabs"
-              variant="scrollable"
-              visibleScrollbar
-            >
-              {tabs.map((tab) => (
-                <StyledTab
-                  key={tab.key}
-                  label={
-                    <Tooltip
-                      title={<span className="text-gray-600 text-xs">{tab.title}</span>}
-                      arrow={false}
-                      color="#fff"
-                    >
-                      <span className="truncate">{tab.title}</span>
-                    </Tooltip>
-                  }
-                  value={tab.key}
-                  icon={
-                    <CloseOutlined
-                      className="ml-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        tab.onClose?.(tab.key);
-                      }}
-                    />
-                  }
-                  className={`${tab.saved ? '' : 'nosave'}`}
-                />
-              ))}
-            </StyledTabList>
-          </Box>
-          <div style={{ height: 'calc(100% - 36px)' }} className="bg-white">
-            {tabs.map((tab) => {
-              const Module = tabComponents[tab.comp];
-              return (
-                Module && (
-                  <Module key={tab.key} current={value} value={tab.key} height={height - 36} {...(tab.params ?? {})} />
-                )
-              );
-            })}
-          </div>
-        </TabContext>
-      ) : null}
+    <div className={`${className ?? ''} tabs-container`} style={{ height: '100%', ...style }}>
+      <div className={`tabs-bar ${tabClassName} scrollbar-small`}>
+        <ul className="tabs-bar__freeze-list">
+          {tabs
+            .filter((item) => item.isFreeze)
+            .map((tab) => (
+              <Tab
+                data={tab}
+                activeId={activeId}
+                key={tab.id}
+                bubbleProps={bubbleProps}
+                onClose={onTabClose}
+                onClick={onTabClick}
+                onRename={onTabRename}
+                onContextMenu={onTabContextMenu}
+              />
+            ))}
+        </ul>
+        <ul className="tabs-bar-list">
+          {tabs
+            .filter((item) => !item.isFreeze)
+            .map((tab) => (
+              <Tab
+                data={tab}
+                activeId={activeId}
+                key={tab.id}
+                bubbleProps={bubbleProps}
+                editable={editable}
+                onClose={onTabClose}
+                onClick={onTabClick}
+                onRename={onTabRename}
+                onContextMenu={onTabContextMenu}
+              />
+            ))}
+        </ul>
+        <div className="tabs-addon">
+          {moreTabs?.length ? (
+            <>
+              <span className="separator"></span>
+              <More
+                tabs={moreTabs}
+                activeId={activeId}
+                onClick={onTabClick}
+                onClose={onTabClose}
+                boxClassName={boxClassName}
+              />
+            </>
+          ) : null}
+          {operates?.length ? (
+            <>
+              <span className="separator"></span>
+              <div className="tabs-operate">
+                {operates.map((item) => (
+                  <span key={item.id} className="tabs-operate-item" onClick={item.callback}>
+                    {item.icon}
+                  </span>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+      <div className="tabs-content">{children instanceof Function ? children(activeId) : children}</div>
     </div>
   );
 }

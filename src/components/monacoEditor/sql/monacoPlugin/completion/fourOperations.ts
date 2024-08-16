@@ -1,4 +1,4 @@
-import { chain, ChainFunction, optional } from 'syntax-parser';
+import { chain, ChainFunction, optional } from '../../../syntaxParser';
 
 // Four operations ---------------------------------
 export function createFourOperations(field: ChainFunction) {

@@ -1,0 +1,28 @@
+.monaco-editor {
+  &.vs-dark {
+    .find-widget .monaco-inputbox.synthetic-focus {
+      background-color: var(--gray-dark-2) !important;
+      outline-color: var(--lanis-db-primary-color) !important;
+      box-shadow: 0px 0px 0px 2px #1a2c4d;
+    }
+  }
+
+  &.vs {
+    .find-widget .monaco-inputbox.synthetic-focus {
+      background-color: var(--white-1) !important;
+      outline-color: var(--lanis-db-primary-color) !important;
+      box-shadow: 0px 0px 0px 2px #d5e7ff;
+    }
+  }
+
+  .monaco-hover-content {
+    .hover-contents {
+      .rendered-markdown {
+        th,
+        td {
+          padding-right: 8px;
+        }
+      }
+    }
+  }
+}

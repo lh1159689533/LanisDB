@@ -10,11 +10,12 @@ import {
 } from './types';
 
 import { patternTableNameBySql, getDBUrl, getTableColumnsSql, getCountSql, isSelectSql } from './utils';
+import { DIALECT } from '@src/constant';
 
 class DB {
   private props: IDBProps;
   private prefix: string;
-  private url: string;
+  public url: string;
 
   constructor(props: IDBProps) {
     this.props = props;
@@ -36,7 +37,7 @@ class DB {
   @tryCatch
   getTables(): Promise<any[]> {
     let sql = '';
-    if (this.props.dialect === 'mysql') {
+    if (this.props.dialect === DIALECT.mysql) {
       const database = (this.props as IMysqlDBProps).database;
       if (!database) throw new Error('mysql数据库查询未指定database');
       sql = `select table_name as name, table_type as type from information_schema.tables where table_schema="${database}" order by table_name`;
@@ -50,9 +51,8 @@ class DB {
   @tryCatch
   async getCreateSql(tableName: string, tableType: 'view' | 'table' = 'table') {
     let createSql: string;
-    if (this.props.dialect === 'mysql') {
+    if (this.props.dialect === DIALECT.mysql) {
       const result = await this.select(`show create ${tableType} ${tableName}`, false);
-      console.log('result:', result);
       const key = tableType === 'table' ? 'Create Table' : 'Create View';
       createSql = result?.[0]?.[key];
     } else {
@@ -166,13 +166,15 @@ class DB {
   execute(sql: string): Promise<any[] | ISelectResult[]> {
     const sqlList = sql.split(';');
     const promises = [];
-    sqlList.filter(item => !!item).forEach((s) => {
-      if (isSelectSql(s)) {
-        promises.push(this.select(s));
-      } else {
-        promises.push(this.executeSql(s));
-      }
-    });
+    sqlList
+      .filter((item) => !!item)
+      .forEach((s) => {
+        if (isSelectSql(s)) {
+          promises.push(this.select(s));
+        } else {
+          promises.push(this.executeSql(s));
+        }
+      });
 
     return Promise.all(promises);
   }
@@ -182,7 +184,7 @@ class DB {
    * @param tableName 表名
    */
   private async tableColumnsDetail_sqlite(tableName: string): Promise<ITableColumnsDetail[]> {
-    const result = (await this.select(getTableColumnsSql(tableName, 'sqlite'), false)) as any[];
+    const result = (await this.select(getTableColumnsSql(tableName, DIALECT.sqlite), false)) as any[];
     if (result?.length) {
       return result.map(({ name, dflt_value, notnull, pk, type }) => ({
         name,
@@ -201,7 +203,7 @@ class DB {
    */
   private async tableColumnsDetail_mysql(tableName: string): Promise<IMysqlTableColumnsDetail[]> {
     const result = (await this.select(
-      getTableColumnsSql(tableName, 'mysql', (this.props as IMysqlDBProps).database),
+      getTableColumnsSql(tableName, DIALECT.mysql, (this.props as IMysqlDBProps).database),
       false
     )) as any[];
     if (result?.length) {
@@ -228,7 +230,7 @@ class DB {
   @tryCatch
   tableColumnsDetail(tableName: string): Promise<IMysqlTableColumnsDetail[]> {
     const { dialect } = this.props;
-    if (dialect === 'mysql') {
+    if (dialect === DIALECT.mysql) {
       return this.tableColumnsDetail_mysql(tableName);
     } else {
       return this.tableColumnsDetail_sqlite(tableName);

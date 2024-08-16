@@ -112,6 +112,27 @@ export const wdLight = {
     'editorBracketMatch.background': '#7fb7ff',
     /** 匹配括号的边框色 */
     'editorBracketMatch.border': '#7fb7ff',
+    /** 自动补全提示项的背景色 */
+    'editorSuggestWidget.selectedBackground': '#009688c6',
+    /** 自动补全提示的背景色 */
+    'editorSuggestWidget.background': '#FFFFFF',
+    /** 自动补全提示的边框色 */
+    'editorSuggestWidget.border': '#CFD5DE',
+    /** 自动补全提示项选中时关键字匹配字符的高亮色 */
+    'editorSuggestWidget.focusHighlightForeground': '#0058df',
+    /** 列表/树鼠标悬停在项目上时的背景色 */
+    'list.hoverBackground': '#f3f4f7',
+    /** Find/Replace背景色 */
+    'editorWidget.background': '#FFFFFF',
+    /** Find/Replace前景色 */
+    'editorWidget.foreground': '#000000A8',
+    /** 输入框背景色 */
+    'input.background': '#f3f4f7',
+    /** icon背景色 */
+    'symbolIcon.functionForeground': '#00000066',
+    'symbolIcon.constructorForeground': '#00000066',
+    'symbolIcon.enumeratorForeground': '#00000066',
+    'symbolIcon.textForeground': '#00000066',
   },
 };
 /* -------------------------------- 浅色主题 End -------------------------------- */
@@ -225,6 +246,25 @@ export const wdDark = {
     'editorBracketMatch.background': '#275da7',
     /** 匹配括号的边框色 */
     'editorBracketMatch.border': '#275da7',
+    /** 自动补全提示项选中时的背景色 */
+    'editorSuggestWidget.selectedBackground': '#009688e6',
+    /** 自动补全提示的背景色 */
+    'editorSuggestWidget.background': '#1B2029',
+    /** 自动补全提示的边框色 */
+    'editorSuggestWidget.border': '#373D4C',
+    /** 列表/树鼠标悬停在项目上时的背景色 */
+    'list.hoverBackground': '#2e3340',
+    /** Find/Replace背景色 */
+    'editorWidget.background': '#1b2029',
+    /** Find/Replace前景色 */
+    'editorWidget.foreground': '#FFFFFF66',
+    /** 输入框背景色 */
+    'input.background': '#232832',
+    /** icon背景色 */
+    'symbolIcon.functionForeground': '#ffffff66',
+    'symbolIcon.constructorForeground': '#ffffff66',
+    'symbolIcon.enumeratorForeground': '#ffffff66',
+    'symbolIcon.textForeground': '#ffffff66',
   },
 };
 /* -------------------------------- 深色主题 End ------------------------------ */

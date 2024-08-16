@@ -34,9 +34,9 @@ class Store {
    */
   async addItem<T, K extends T & { id: number }>(key: string, value: T): Promise<K[]> {
     const values = await this.getItem<K[]>(key);
-    const index = values.findIndex(item => item.id === (value as any).id);
-    if (index !== -1) {
-      values.splice(index, 1, value as unknown as K);
+    const index = values?.findIndex((item) => item.id === (value as any).id);
+    if (values && index !== -1) {
+      values.splice(index, 1, (value as unknown) as K);
       return this.setItem<K[]>(key, values);
     }
     if (!values) {
@@ -52,7 +52,10 @@ class Store {
    */
   async delItem<T, K extends T & { id: number }>(key: string, id: number): Promise<K[]> {
     const values = await this.getItem<K[]>(key);
-    return this.setItem<K[]>(key, values.filter(item => item.id !== id));
+    return this.setItem<K[]>(
+      key,
+      values.filter((item) => item.id !== id)
+    );
   }
 
   /**

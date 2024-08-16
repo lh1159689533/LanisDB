@@ -1,7 +1,7 @@
 import { Box, AppBar } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { IOperateItem } from '@src/types';
-import { Tooltip } from 'antd';
+import { Popover } from 'antd';
 import { useEffect, useState } from 'react';
 
 interface IAppBar {
@@ -66,7 +66,10 @@ export default function CusAppBar({ items, type = 'button' }: IAppBar) {
             );
           } else if (type === 'icon') {
             return (
-              <Tooltip key={item.key} title={<span className="text-gray-600 text-xs">{item.title}</span>} color="#fff">
+              <Popover
+                key={item.key}
+                content={<span style={{ color: 'var(--lanis-db-text-color-primary)' }}>{item.title}</span>}
+              >
                 <LoadingButton
                   key={item.key}
                   onClick={async () => {
@@ -96,7 +99,7 @@ export default function CusAppBar({ items, type = 'button' }: IAppBar) {
                     {item.icon}
                   </i>
                 </LoadingButton>
-              </Tooltip>
+              </Popover>
             );
           }
         })}

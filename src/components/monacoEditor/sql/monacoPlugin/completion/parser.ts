@@ -1,4 +1,4 @@
-import { chain, many, optional, plus, matchTokenType } from 'syntax-parser';
+import { chain, many, optional, plus, matchTokenType } from '../../../syntaxParser';
 import { createFourOperations } from './fourOperations';
 import { createTableName, flattenAll } from './utils';
 import { reserveKeys } from './reserveKeys';

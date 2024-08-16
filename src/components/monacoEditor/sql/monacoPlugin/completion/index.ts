@@ -1,5 +1,5 @@
+import { createParser } from '../../../syntaxParser';
 import * as reader from './reader';
-import { createParser } from 'syntax-parser';
 import { IStatements } from './types';
 import { sqlTokenizer } from './lexer';
 import { root } from './parser';

@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Slide, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Slide, Button, DialogProps } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 
 const Transition = forwardRef(function Transition(
@@ -18,6 +18,7 @@ interface ITransitionDialog {
   okText?: string;
   cancleText?: string;
   actions?: { title: string; primary?: boolean; handle?: () => void }[];
+  maxWidth?: DialogProps['maxWidth'];
   onClose?: () => void;
   onConfirm?: () => void;
 }
@@ -29,6 +30,7 @@ export default function TransitionDialog({
   okText = '确定',
   cancleText = '取消',
   actions,
+  maxWidth,
   onClose,
   onConfirm,
 }: ITransitionDialog) {
@@ -49,6 +51,7 @@ export default function TransitionDialog({
       // onClose={handleClose}
       aria-describedby="new-database-dialog"
       disableEscapeKeyDown
+      maxWidth={maxWidth}
     >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>{children}</DialogContent>

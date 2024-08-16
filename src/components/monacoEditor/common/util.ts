@@ -1,6 +1,6 @@
 import { THEME } from './constants';
 import EventBus from './eventBus';
-import { CompletionTable, CompletionColumn } from '../common/types';
+import { CompletionTable, CompletionColumn, CompletionFunc } from '../common/types';
 
 /** 获取wedata主题 */
 const getTheme = () => (document.body.hasAttribute('dark-theme') ? THEME.dark : THEME.light);
@@ -49,4 +49,18 @@ const getColumnsByDbNameAndTableName = async (
   return data ?? [];
 };
 
-export { getDatabaseList, getTableListByDbName, getColumnsByDbNameAndTableName, getTheme };
+/**
+ * 查询表的列
+ * @param databaseName 数据库名
+ * @param tableName 表名
+ */
+const getFunctions = async (modelId: string): Promise<CompletionFunc[]> => {
+  const columnApi = EventBus.get(modelId)?.func;
+  if (!columnApi) return [];
+
+  const data = await columnApi();
+
+  return data ?? [];
+};
+
+export { getDatabaseList, getTableListByDbName, getColumnsByDbNameAndTableName, getFunctions, getTheme };

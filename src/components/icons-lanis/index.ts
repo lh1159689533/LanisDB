@@ -8,3 +8,5 @@ export { DeleteIcon } from './delete';
 export { TableIcon } from './table';
 export { ColumnIcon } from './column';
 export { RefreshIcon } from './refresh';
+export { CloseIcon } from './close';
+export { SearchIcon } from './search';

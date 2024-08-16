@@ -9,7 +9,7 @@ export const DEFAULT_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
   /** 行高 */
   lineHeight: 21,
   /** 字体大小 */
-  fontSize: 14,
+  fontSize: 12,
   /** 控制行号的宽度 */
   lineNumbersMinChars: 5,
   /** 设置tab空格符数量 */

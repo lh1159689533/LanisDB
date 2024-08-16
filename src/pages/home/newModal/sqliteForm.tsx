@@ -25,7 +25,7 @@ function SqliteFile({ value, onChange }: ISqliteFile) {
     });
     setDBFile(selected as string);
     onChange?.(selected as string);
-    // const db = await DB.load({ dialect: 'sqlite', storage: selected as string });
+    // const db = await DB.load({ dialect: DIALECT.sqlite, storage: selected as string });
     // const result = await db.select('select * from article');
     // console.log('result:', result)
   };

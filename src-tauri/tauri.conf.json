@@ -17,11 +17,27 @@
         "open": true,
         "save": true
       },
-      "path": {
-        "all": true
+      "fs": {
+        "writeFile": true,
+        "exists": true,
+        "createDir": true,
+        "readFile": true,
+        "removeFile": true,
+        "scope": [
+          "$APPDATA/**/*"
+        ]
       },
       "window": {
-        "setTitle": true
+        "setTitle": true,
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true
       }
     },
     "bundle": {

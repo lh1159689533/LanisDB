@@ -1,51 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Tree, Select } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import { LoadingButton } from '@mui/lab';
+import { BaseDirectory, removeFile } from '@tauri-apps/api/fs';
+import store from '@src/utils/store';
 import useTab from '@hooks/useTab';
 import { IPage } from '@src/types';
 import useAppState from '@src/hooks/useAppState';
 import DB from '@src/utils/db';
-import LanisMenu from '@src/components/menu';
+import LanisMenu from '@src/components/Menu';
 import { convertColumnType } from '@src/utils/db/utils';
-import ViewCreateSql from './components/viewCreateSql';
 import { TableIcon, ColumnIcon } from '@components/icons-lanis';
+import { DIALECT } from '@src/constant';
+import ViewCreateSql from './components/viewCreateSql';
 
 import './index.less';
-
-// 表类型节点右键菜单列表
-const rightMenuTable = [
-  {
-    key: 'openTable',
-    title: '打开表',
-  },
-  {
-    key: 'editTable',
-    title: '编辑表',
-  },
-  {
-    key: 'viewCreateSql',
-    title: '查看建表语句',
-  },
-  {
-    key: 'delTable',
-    title: '删除表',
-  },
-];
-
-// 视图类型节点右键菜单列表
-const rightMenuView = [
-  {
-    key: 'viewCreateSql',
-    title: '查看创建语句',
-  },
-  {
-    key: 'delView',
-    title: '删除视图',
-  },
-];
 
 /**
  * 更新树节点数据
@@ -82,8 +53,6 @@ interface ITreeData extends DataNode {
 export default function Sidebar() {
   // 树数据
   const [treeData, setTreeData] = useState<ITreeData[]>([]);
-  // 右键菜单挂在点
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   // 当前选择的树节点
   const [currentNode, setCurrentNode] = useState<ITreeData>(null);
   // 建表语句
@@ -91,15 +60,95 @@ export default function Sidebar() {
   // 库列表(mysql)
   const [databaseList, setDatabaseList] = useState([]);
   const [database, setDatabase] = useState('');
-
-  const [rightMenu, setRightMenu] = useState(rightMenuTable);
   const [loading, setLoading] = useState(false);
+
+  const menuRef = useRef(null);
 
   const [db] = useAppState<DB>('dbInstance');
 
   const tab = useTab('sqlQueryResult');
+  const tabSqlQuery = useTab('sqlQuery');
 
   const { type } = useParams<IParam>();
+
+  // 视图类型节点右键菜单列表
+  const rightMenuQuery = [
+    {
+      id: 'openQuery',
+      label: '打开',
+      callback() {
+        tabSqlQuery.add({
+          id: `${currentNode.key}`,
+          title: `${currentNode.title}`,
+          onClose: (id: string) => {
+            tabSqlQuery.close(id);
+          },
+        });
+      },
+    },
+    {
+      id: 'deleteQuery',
+      label: '删除',
+      callback() {
+        tabSqlQuery.close(`${currentNode.key}`);
+        store.delItem(db.url, Number(currentNode.key));
+        removeFile(`sqlite/main/${currentNode.title}`, { dir: BaseDirectory.AppData });
+      },
+    },
+  ];
+
+  // 表类型节点右键菜单列表
+  const rightMenuTable = [
+    {
+      id: 'openTable',
+      label: '打开表',
+      callback() {
+        const tableName = currentNode.title as string;
+        openTable(tableName);
+      },
+    },
+    {
+      id: 'editTable',
+      label: '编辑表',
+      callback() {
+        console.log('编辑表');
+      },
+    },
+    {
+      id: 'viewCreateSql',
+      label: '查看建表语句',
+      callback() {
+        const tableName = currentNode.title as string;
+        const tableType = currentNode.type;
+        viewCreateSql(tableName, tableType);
+      },
+    },
+    {
+      id: 'deleteTable',
+      label: '删除表',
+      callback() {
+        console.log('删除表');
+      },
+    },
+  ];
+
+  // 视图类型节点右键菜单列表
+  const rightMenuView = [
+    {
+      id: 'viewCreateSql',
+      label: '查看创建语句',
+      callback() {
+        console.log('查看创建语句');
+      },
+    },
+    {
+      id: 'deleteView',
+      label: '删除视图',
+      callback() {
+        console.log('删除视图');
+      },
+    },
+  ];
 
   /**
    * 查询表数据
@@ -118,7 +167,7 @@ export default function Sidebar() {
         columns: result.columns.map((item) => ({
           title: item.name,
           field: item.name,
-          type: convertColumnType(item.type)
+          type: convertColumnType(item.type),
         })),
         data: result.data,
         total: result.total,
@@ -134,15 +183,13 @@ export default function Sidebar() {
    */
   const openTable = (tableName: string) => {
     tab.add({
-      key: tableName ?? `result${dayjs().millisecond()}`,
+      id: tableName ?? `result${dayjs().millisecond()}`,
       title: tableName ?? '结果集',
-      saved: true,
-      comp: 'SqlQueryResult',
       params: {
         queryTableData: (page?: IPage) => queryTableData(tableName, page),
       },
-      onClose(key: string) {
-        tab.remove(key);
+      onClose(id: string) {
+        tab.close(id);
       },
     });
   };
@@ -169,11 +216,9 @@ export default function Sidebar() {
    * 右键点击事件
    */
   const handleRightClick = ({ event, node }) => {
-    if (node?.type === 'table' || node?.type === 'view') {
-      setAnchorEl(event.target);
-      setCurrentNode(node);
-      setRightMenu(node.type === 'table' ? rightMenuTable : rightMenuView);
-    }
+    event.preventDefault();
+    setCurrentNode(node);
+    menuRef.current?.show(event);
   };
 
   /**
@@ -221,7 +266,7 @@ export default function Sidebar() {
     let treeData = [];
     const datas = await db.getTables();
 
-    if (type === 'mysql') {
+    if (type === DIALECT.mysql) {
       const tables = datas.filter((item) => item.type !== 'VIEW');
       const views = datas.filter((item) => item.type === 'VIEW');
       treeData = [
@@ -267,6 +312,22 @@ export default function Sidebar() {
         },
       ];
     }
+
+    const querys = await store.getItem<{ id: string; name: string; path: string }[]>(db.url);
+    treeData.push({
+      key: 'query-list',
+      title: `查询（${querys?.length}）`,
+      icon: <TableIcon />,
+      selectable: false,
+      children: querys?.map((item) => ({
+        key: item.id,
+        title: item.name,
+        icon: <TableIcon />,
+        type: 'query',
+        children: null,
+        isLeaf: true,
+      })),
+    });
     setTreeData(treeData);
   };
 
@@ -292,24 +353,7 @@ export default function Sidebar() {
    * 右键菜单关闭回调
    */
   const handleMenuClose = () => {
-    setAnchorEl(null);
     setCurrentNode(null);
-  };
-
-  /**
-   * 菜单点击事件
-   */
-  const handleMenuClick = (key: string) => {
-    const tableName = currentNode.title as string;
-    const tableType = currentNode.type;
-    if (key === 'openTable') {
-      openTable(tableName);
-    } else if (key === 'editTable') {
-    } else if (key === 'viewCreateSql') {
-      viewCreateSql(tableName, tableType);
-    } else if (key === 'delTable') {
-    }
-    handleMenuClose();
   };
 
   /**
@@ -332,8 +376,22 @@ export default function Sidebar() {
     setLoading(false);
   };
 
+  const getRightMenuList = () => {
+    const nodeType = currentNode?.type;
+    if (!['view', 'table', 'query'].includes(nodeType)) {
+      return [];
+    }
+    if (nodeType === 'view') {
+      return rightMenuView;
+    }
+    if (nodeType === 'query') {
+      return rightMenuQuery;
+    }
+    return rightMenuTable;
+  };
+
   useEffect(() => {
-    if (type === 'mysql') {
+    if (type === DIALECT.mysql) {
       getDatabases();
     } else {
       getTables();
@@ -346,7 +404,7 @@ export default function Sidebar() {
 
   return (
     <div className="sidebar border-r">
-      {type === 'mysql' && (
+      {type === DIALECT.mysql && (
         <div className="px-2 mb-2">
           <Select
             showSearch
@@ -364,20 +422,14 @@ export default function Sidebar() {
         <Tree.DirectoryTree
           treeData={treeData}
           blockNode
-          expandAction={false}
-          onSelect={handleSelect}
+          expandAction="click"
+          // onSelect={handleSelect}
           onRightClick={handleRightClick}
           loadData={onLoadData}
           className="db-sidebar-tree"
         />
       )}
-      <LanisMenu
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        menus={rightMenu}
-        onClose={handleMenuClose}
-        onMenuClick={handleMenuClick}
-      />
+      <LanisMenu id="db_siderbar_tree__rightmenu" ref={menuRef} menus={getRightMenuList()} />
       <ViewCreateSql open={Boolean(createSql)} createSql={createSql} onClose={handleViewCreateSqlClose} />
     </div>
   );

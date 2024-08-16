@@ -1,0 +1,288 @@
+.tabs-container {
+  background: var(--lanis-db-bg-color-tool-bar);
+  width: 100%;
+
+  .tabs-bar {
+    height: 40px;
+    width: 100%;
+    background-color: var(--lanis-db-bg-color-tab-bar);
+    border: 0;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    // border-bottom: 1px solid var(--lanis-db-border-color);
+    padding-top: 6px;
+    padding-left: 6px;
+
+    .tabs-bar-list {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .tabs-bar-list,
+    .tabs-bar__freeze-list {
+      display: flex;
+
+      .tabs-item {
+        margin: 0;
+        height: 34px;
+        line-height: 30px;
+        font-size: 13px;
+        user-select: none;
+        -webkit-user-select: none;
+        padding: 0;
+        min-width: fit-content;
+        display: flex;
+        border-radius: 2px 2px 0 0;
+        box-sizing: border-box;
+        cursor: pointer;
+        border-right: 0;
+        margin-right: 4px;
+
+        &.is-active {
+          background: var(--lanis-db-bg-color-tabs-active);
+        }
+
+        &.is-active {
+          .tabs-item__tab {
+            .title {
+              color: var(--lanis-db-text-color-primary);
+            }
+
+            .close_btn {
+              visibility: visible !important;
+            }
+
+            &.unsave {
+              .tab__unsave::after {
+                width: 9px;
+                height: 9px;
+              }
+
+              .close_btn {
+                visibility: hidden !important;
+              }
+            }
+          }
+        }
+
+        &:not(.is-active) > .tabs-item__tab {
+          &:hover {
+            background: var(--lanis-db-bg-color-navigation-hover);
+
+            &:not(.unsave) {
+              .close_btn {
+                visibility: visible !important;
+              }
+            }
+          }
+        }
+
+        .tabs-item__tab {
+          flex: 1;
+          min-width: 0;
+          padding: 0px 8px;
+          box-sizing: border-box;
+          position: relative;
+          line-height: 22px;
+          height: 28px;
+          display: flex;
+          gap: 4px;
+          color: var(--lanis-db-text-color-primary);
+          align-items: center;
+          border-radius: 2px;
+          cursor: pointer;
+
+          .title {
+            flex: 1;
+            color: var(--lanis-db-text-color-secondary);
+            max-width: 300px;
+          }
+
+          &.is-disabled .tabs-item__tab {
+            .title {
+              color: var(--lanis-db-text-color-disabled);
+            }
+
+            &:hover {
+              background: transparent;
+              cursor: not-allowed;
+
+              .title {
+                color: var(--lanis-db-text-color-secondary);
+              }
+            }
+          }
+
+          .close_btn {
+            color: var(--lanis-db-text-color-secondary);
+            visibility: hidden;
+            margin-top: -1px;
+
+            &:hover {
+              color: var(--lanis-db-text-color-primary);
+            }
+          }
+
+          .tab__unsave {
+            display: flex;
+            justify-content: center;
+            position: absolute;
+            top: 7px;
+            right: 4px;
+
+            &::after {
+              content: '';
+              background-color: var(--lanis-db-text-color-disabled);
+              width: 0px;
+              height: 0px;
+              border-radius: 50%;
+            }
+          }
+
+          &.unsave {
+            .tab__unsave::after {
+              width: 9px;
+              height: 9px;
+            }
+
+            .close_btn {
+              visibility: hidden !important;
+            }
+          }
+
+          .close-save_btn {
+            position: relative;
+          }
+
+          .close-save_btn:hover {
+            .close_btn {
+              visibility: visible !important;
+            }
+
+            .tab__unsave::after {
+              width: 0px;
+              height: 0px;
+            }
+          }
+        }
+      }
+    }
+
+    .tabs-addon {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0 6px;
+      margin-top: -6px;
+
+      .separator {
+        height: 16px;
+        width: 1px;
+        background-color: var(--lanis-db-border-color);
+        margin: 0 4px;
+      }
+
+      .tabs-more {
+        .more-dropdown {
+          background: transparent;
+          border-radius: 2px;
+          color: var(--lanis-db-text-color-placeholder);
+
+          .ruyi-icon {
+            cursor: pointer;
+            border-radius: 2px;
+            margin-top: 2px;
+
+            &:hover {
+              background-color: var(--lanis-db-bg-color-secondarybutton-hover);
+            }
+          }
+        }
+      }
+
+      .tabs-operate {
+        display: flex;
+        align-items: center;
+
+        .tabs-operate-item {
+          width: 28px;
+          height: 28px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: var(--lanis-db-text-color-secondary);
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .tabs-content {
+    height: calc(100% - 40px);
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+}
+
+.tabs-more-container {
+  background: var(--lanis-db-bg-color-dropdown);
+  border: 0.5px solid var(--lanis-db-border-color);
+  border-radius: 2px !important;
+  box-shadow: var(--lanis-db-shadow-large);
+  color: var(--lanis-db-text-color-primary);
+  padding: 4px;
+
+  .ant-list-item {
+    margin-top: 4px;
+  }
+
+  .tabs-item {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    gap: 4px;
+    border-radius: 2px;
+
+    .tabs-item__tab {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--lanis-db-text-color-secondary);
+
+      .title {
+        flex: 1;
+      }
+
+      .close_btn {
+        visibility: hidden;
+
+        &:hover {
+          color: var(--lanis-db-text-color-primary);
+        }
+      }
+    }
+
+    &:not(.is-active):hover {
+      color: var(--lanis-db-text-color-primary);
+      background: var(--lanis-db-bg-color-dropdown-hover);
+    }
+
+    &:hover {
+      .close_btn {
+        visibility: visible;
+      }
+    }
+
+    &.is-active {
+      background: var(--lanis-db-bg-color-navigation-primary-active) !important;
+      color: var(--lanis-db-text-color-dropdown-active);
+    }
+  }
+}

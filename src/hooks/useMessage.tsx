@@ -14,14 +14,14 @@ const DEFAULT_OPTIONS = {
 export default function () {
   /**
    * autoHideDuration为0且没有自定义action，则显示关闭按钮
-   * @param id 消息的唯一ID
    * @param props
+   * @param onClose 关闭
    */
-  const isShowClose = (id, props) => {
+  const isShowClose = (props, onClose) => {
     if (props.autoHideDuration === 0 && !props.action) {
       props.autoHideDuration = null;
       props.action = (
-        <IconButton aria-label="close" color="inherit" sx={{ p: 0.5 }} onClick={() => closeSnackbar(id)}>
+        <IconButton aria-label="close" color="inherit" sx={{ p: 0.5 }} onClick={onClose}>
           <CloseIcon />
         </IconButton>
       );
@@ -31,28 +31,32 @@ export default function () {
   const success = (message: string, props?: OptionsWithExtraProps<'success'>) => {
     let id;
     const successProps = { ...DEFAULT_OPTIONS, ...(props ?? {}) } as OptionsWithExtraProps<'success'>;
-    isShowClose(id, successProps);
+    isShowClose(successProps, () => closeSnackbar(id));
     id = enqueueSnackbar(message, { variant: 'success', ...successProps });
   };
 
   const error = (message: string, props?: OptionsWithExtraProps<'error'>) => {
     let id;
-    const successProps = { ...DEFAULT_OPTIONS, ...(props ?? {}) } as OptionsWithExtraProps<'error'>;
-    isShowClose(id, successProps);
+    const successProps = {
+      ...DEFAULT_OPTIONS,
+      ...(props ?? {}),
+      autoHideDuration: 0,
+    } as OptionsWithExtraProps<'error'>;
+    isShowClose(successProps, () => closeSnackbar(id));
     id = enqueueSnackbar(message, { variant: 'error', ...successProps });
   };
 
   const warning = (message: string, props?: OptionsWithExtraProps<'warning'>) => {
     let id;
     const successProps = { ...DEFAULT_OPTIONS, ...(props ?? {}) } as OptionsWithExtraProps<'warning'>;
-    isShowClose(id, successProps);
+    isShowClose(successProps, () => closeSnackbar(id));
     id = enqueueSnackbar(message, { variant: 'warning', ...successProps });
   };
 
   const info = (message: string, props?: OptionsWithExtraProps<'info'>) => {
     let id;
     const successProps = { ...DEFAULT_OPTIONS, ...(props ?? {}) } as OptionsWithExtraProps<'info'>;
-    isShowClose(id, successProps);
+    isShowClose(successProps, () => closeSnackbar(id));
     id = enqueueSnackbar(message, { variant: 'info', ...successProps });
   };
 

@@ -1,0 +1,48 @@
+@import 'react-contexify/dist/ReactContexify.css';
+
+/** 自定义react-contexify菜单样式 */
+.contexify {
+  --contexify-zIndex: 1002;
+
+  min-width: 120px !important;
+  border-radius: 2px !important;
+  border: 0.5px solid var(--lanis-db-border-color);
+  background: var(--lanis-db-bg-color-dropdown);
+  box-shadow: var(--lanis-db-shadow-large);
+  padding: 6px 4px;
+
+  .contexify_item {
+    border-radius: 2px;
+
+    .contexify_itemContent {
+      color: var(--lanis-db-text-color-dropdown);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+
+    &.delete,
+    &.del {
+      .contexify_itemContent {
+        color: var(--lanis-db-text-color-dropdown-warning);
+      }
+    }
+  }
+
+  .contexify_item:not(.contexify_item-disabled):focus,
+  .contexify_item:not(.contexify_item-disabled):hover {
+    .contexify_itemContent {
+      background: var(--lanis-db-bg-color-dropdown-hover);
+      border-radius: 2px;
+    }
+    &:not(.delete, .del) {
+      .contexify_itemContent {
+        color: var(--lanis-db-text-color-dropdown);
+      }
+    }
+  }
+
+  .contexify_separator {
+    background-color: var(--lanis-db-stroke-color-secondary);
+    margin: 4px;
+  }
+}

@@ -209,7 +209,7 @@ class MonacoEditor {
           text: value,
         },
       ],
-      null as unknown as monacoEditor.ICursorStateComputer
+      (null as unknown) as monacoEditor.ICursorStateComputer
     );
 
     // 保持光标位置和选中内容
@@ -361,7 +361,9 @@ class MonacoEditor {
   createDecorations(target: monacoEditor.IMouseTarget) {
     if (this.props.createDecorations) {
       this.decoration?.clear();
-      this.decoration = this.editor!.createDecorationsCollection(this.props.createDecorations(target));
+      this.decoration = this.editor!.createDecorationsCollection(
+        this.props.createDecorations(target, this.editor.getModel())
+      );
     }
   }
 

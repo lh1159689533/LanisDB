@@ -1,7 +1,9 @@
-import React, { useImperativeHandle, useEffect, forwardRef, useRef, ForwardedRef } from 'react';
+import { useImperativeHandle, useEffect, forwardRef, useRef, ForwardedRef } from 'react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import MonacoEditor from './monacoEditor';
 import { BaseEditorProps } from './common/types';
+
+import './styles/index.less';
 
 function Editor(
   {

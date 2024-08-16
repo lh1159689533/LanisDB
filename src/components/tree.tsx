@@ -29,8 +29,8 @@ const StyledTreeItemRoot = styled(TreeItem)(({ theme }) => ({
   color: theme.palette.text.secondary,
   [`& .${treeItemClasses.content}`]: {
     color: theme.palette.text.secondary,
-    borderTopRightRadius: theme.spacing(.5),
-    borderBottomRightRadius: theme.spacing(.5),
+    borderTopRightRadius: theme.spacing(0.5),
+    borderBottomRightRadius: theme.spacing(0.5),
     paddingRight: theme.spacing(1),
     fontWeight: theme.typography.fontWeightMedium,
     '&.Mui-expanded': {
@@ -38,7 +38,7 @@ const StyledTreeItemRoot = styled(TreeItem)(({ theme }) => ({
     },
     '&:hover': {
       backgroundColor: '#a5b4fc',
-      color: '#FFF'
+      color: '#FFF',
     },
     '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
       backgroundColor: `var(--tree-view-bg-color, ${theme.palette.action.selected})`,
@@ -71,10 +71,8 @@ function StyledTreeItem(props: StyledTreeItemProps) {
   } = props;
 
   const styleProps = {
-    '--tree-view-color':
-      theme.palette.mode !== 'dark' ? '#fff' : colorForDarkMode,
-    '--tree-view-bg-color':
-      theme.palette.mode !== 'dark' ? '#818cf8' : bgColorForDarkMode,
+    '--tree-view-color': theme.palette.mode !== 'dark' ? '#fff' : colorForDarkMode,
+    '--tree-view-bg-color': theme.palette.mode !== 'dark' ? '#818cf8' : bgColorForDarkMode,
   };
 
   return (
@@ -89,10 +87,7 @@ function StyledTreeItem(props: StyledTreeItemProps) {
           }}
         >
           <Box component={LabelIcon} color="inherit" sx={{ mr: 1 }} />
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 'inherit', flexGrow: 1 }}
-          >
+          <Typography variant="body2" sx={{ fontWeight: 'inherit', flexGrow: 1 }}>
             {labelText}
           </Typography>
           <Typography variant="caption" color="inherit">
@@ -107,7 +102,6 @@ function StyledTreeItem(props: StyledTreeItemProps) {
 }
 
 export default function Tree({ treeData }) {
-  console.log(treeData instanceof Array);
   return (
     <TreeView
       aria-label="tree"
@@ -118,12 +112,7 @@ export default function Tree({ treeData }) {
       sx={{ height: 264, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
     >
       {treeData.map((item, idx) => (
-        <StyledTreeItem
-          nodeId={`${item.id ?? idx}`}
-          key={item.id ?? idx}
-          labelText={item.label}
-          labelIcon={item.icon}
-        >
+        <StyledTreeItem nodeId={`${item.id ?? idx}`} key={item.id ?? idx} labelText={item.label} labelIcon={item.icon}>
           {item.children?.length
             ? item.children.map((child, cidx) => (
                 <StyledTreeItem

@@ -56,6 +56,17 @@ export interface CompletionTable {
   name: string;
 }
 
+export interface CompletionFunc {
+  /** 表名 */
+  name: string;
+  /** 快捷语法 */
+  snippet?: string;
+  /** 用法 */
+  usage?: string;
+  /** 说明 */
+  desc?: string;
+}
+
 export interface MonacoEditorProps extends monacoEditor.editor.IStandaloneEditorConstructionOptions {
   /** 编辑器挂载容器 */
   el?: string | Element;
@@ -64,7 +75,10 @@ export interface MonacoEditorProps extends monacoEditor.editor.IStandaloneEditor
   /** 自定义右键菜单 */
   contextmenus?: Contextmenu[];
   /** 渲染行装饰，只需要返回一个数组，具体渲染在内部进行 */
-  createDecorations?: (target: monacoEditor.editor.IMouseTarget) => monacoEditor.editor.IModelDeltaDecoration[];
+  createDecorations?: (
+    target: monacoEditor.editor.IMouseTarget,
+    model: monacoEditor.editor.ITextModel
+  ) => monacoEditor.editor.IModelDeltaDecoration[];
 }
 
 export type EditorConstructionOptions = NonNullable<Parameters<typeof monacoEditor.editor.create>[1]>;
@@ -123,9 +137,9 @@ export interface BaseEditorProps {
 
 export interface SqlEditorProps extends Omit<BaseEditorProps, 'language'> {
   /**
-   * sql自动补全-数据库回调
+   * sql自动补全-函数回调
    */
-  onDbCompletion?: () => Promise<string[]>;
+  onFunctionCompletion?: () => Promise<CompletionFunc[]> | CompletionFunc[];
   /**
    * sql自动补全-表回调
    * @param databaseName 库名

@@ -18,15 +18,14 @@
 
     section {
       width: calc(100% - 260px);
-      @apply flex flex-col overflow-hidden;
+      @apply flex flex-col overflow-hidden relative;
 
       .sql-tabs {
-        // height: 40%;
+        @apply absolute top-0 bottom-0 right-0 left-0;
       }
 
       .data-list {
-        // max-height: 80%;
-        @apply flex-1 z-10;
+        @apply flex-1 z-10 absolute;
       }
     }
   }

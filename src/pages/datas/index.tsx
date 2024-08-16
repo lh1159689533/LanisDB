@@ -3,26 +3,28 @@ import { useHistory } from 'react-router-dom';
 import { AddCardOutlined, NoteAddOutlined } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { appWindow } from '@tauri-apps/api/window';
-import Tabs from '@src/components/tabs';
 import useAppState from '@src/hooks/useAppState';
+import useTab from '@hooks/useTab';
+import usePersistFn from '@hooks/usePersistFn';
+import Resize from '@components/resize';
+import { ITabData } from '@components/Tabs';
+import { IOperateItem } from '@src/types';
+import DB from '@src/utils/db';
 import Header from './header';
 import Sidebar from '../sidebar';
-import useTab from '@hooks/useTab';
-import Resize from '@components/resize';
-import { IOperateItem, ITab } from '@src/types';
-import DB from '@src/utils/db';
+import SqlQueryTabs from './sqlQueryTabs';
+import ResultTabs from './resultTabs';
 
 import './index.less';
 
 export default function Datas() {
-  const [sqlTabs = []] = useAppState<ITab[]>('sqlQuery');
-  const [resultTabs = []] = useAppState<ITab[]>('sqlQueryResult');
+  const [sqlTabs] = useAppState<ITabData[]>('sqlQuery');
+  const [resultTabs] = useAppState<ITabData[]>('sqlQueryResult');
 
   const [db] = useAppState<DB>('dbInstance');
 
   const [height, setHeight] = useState(0);
   const [resultTabsHeight, setResultTabsHeight] = useState(0);
-  const [sqlTabsHeight, setSqlTabsHeight] = useState(0);
 
   const sectionRef = useRef(null);
 
@@ -48,19 +50,17 @@ export default function Datas() {
       icon: <NoteAddOutlined />,
       handle() {
         tab.add({
-          key: `newquery${dayjs().millisecond()}`,
+          id: `newquery${dayjs().millisecond()}`,
           title: '新建查询',
-          saved: true,
-          comp: 'SqlQueryEditor',
-          onClose(key: string) {
-            tab.remove(key);
+          onClose(id: string) {
+            tab.close(id);
           },
         });
       },
     },
   ];
 
-  const resize = () => {
+  const resize = usePersistFn(() => {
     const sectionHeight = sectionRef.current?.getBoundingClientRect().height;
     let resultHeight = 0;
     if (resultTabs?.length) {
@@ -68,12 +68,10 @@ export default function Datas() {
     }
     setHeight(sectionHeight);
     setResultTabsHeight(resultHeight);
-    setSqlTabsHeight(height - resultHeight);
-  };
+  });
 
   const onResize = (size: number) => {
     setResultTabsHeight(size);
-    setSqlTabsHeight(height - size);
   };
 
   useEffect(() => {
@@ -83,15 +81,25 @@ export default function Datas() {
   }, []);
 
   useEffect(() => {
-    if (sectionRef.current) {
+    if (!sectionRef.current) return;
+    const sectionHeight = sectionRef.current?.getBoundingClientRect().height;
+    if (
+      // 查询tabs从无到有
+      (resultTabsHeight === sectionHeight && sqlTabs?.length > 0) ||
+      // 结果tabs从无到有
+      (resultTabsHeight === 0 && resultTabs?.length > 0) ||
+      // 查询、结果tabs从有到无
+      (resultTabsHeight > 0 && (resultTabs?.length === 0 || sqlTabs?.length === 0))
+    ) {
       resize();
     }
+
     window.addEventListener('resize', resize);
 
     return () => {
       window.removeEventListener('resize', resize);
     };
-  }, [sectionRef.current, sqlTabs, resultTabs]);
+  }, [sectionRef.current, resultTabs?.length, sqlTabs?.length, resultTabsHeight]);
 
   return (
     <div className="data-page">
@@ -101,12 +109,21 @@ export default function Datas() {
           <Sidebar />
         </div>
         <section ref={sectionRef}>
-          <div className="sql-tabs">
-            {sqlTabs?.length ? <Tabs tabs={sqlTabs} tabKey="sqlQuery" height={sqlTabsHeight} /> : null}
+          <div className="sql-tabs" style={{ height: `calc(100% - ${resultTabsHeight}px)` }}>
+            {sqlTabs?.length ? <SqlQueryTabs tabs={sqlTabs} /> : null}
           </div>
-          <div className="data-list relative">
-            {sqlTabs?.length ? <Resize type="row" onResize={onResize} max={height * 0.9} min={45} /> : null}
-            {resultTabs?.length ? <Tabs tabs={resultTabs} tabKey="sqlQueryResult" height={resultTabsHeight} /> : null}
+          <div
+            className="data-list"
+            style={{ height: resultTabsHeight, top: `calc(100% - ${resultTabsHeight}px)`, width: '100%' }}
+          >
+            {sqlTabs?.length && resultTabs?.length ? (
+              <Resize type="row" onResize={onResize} max={height * 0.9} min={45} />
+            ) : null}
+            {resultTabs?.length ? (
+              <div style={{ height: resultTabsHeight - 3 }}>
+                <ResultTabs tabs={resultTabs} height={resultTabsHeight - 3} />
+              </div>
+            ) : null}
           </div>
         </section>
       </main>

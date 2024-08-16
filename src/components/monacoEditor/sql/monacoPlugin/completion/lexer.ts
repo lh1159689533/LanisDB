@@ -1,4 +1,4 @@
-import { createLexer } from 'syntax-parser';
+import { createLexer } from '../../../syntaxParser';
 
 export const sqlTokenizer = createLexer([
   {

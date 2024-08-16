@@ -1,63 +1,135 @@
 import { useEffect, useRef } from 'react';
+import { cloneDeep } from 'lodash';
 import useAppState from './useAppState';
-import { ITab } from '@src/types';
+import { ITabData } from '@src/components/Tabs/types';
 
 export default function useTab(tabKey: string) {
-  const [tabs, setTabs] = useAppState<ITab[]>(tabKey);
-  const tabsRef = useRef<ITab[]>([]);
+  const [tabs, setTabs] = useAppState<ITabData[]>(tabKey);
+  const tabsRef = useRef<ITabData[]>([]);
 
   useEffect(() => {
     tabsRef.current = tabs ?? [];
   }, [tabs]);
 
-  const add = (tab: ITab) => {
-    const index = tabsRef.current.findIndex(item => item.key === tab.key);
+  /**
+   * 新增
+   * @param tab 页签数据
+   */
+  const add = (tab: ITabData) => {
+    const index = tabsRef.current.findIndex((item) => item.id === tab.id);
     if (index === -1) {
-      tabsRef.current = [...tabsRef.current, tab];
+      tabsRef.current.push(tab);
     }
-    active(tab.key);
-    const tabs = [...tabsRef.current];
-    setTabs(tabs);
+    active(tab.id);
+    setTabs([...tabsRef.current]);
   };
 
-  const remove = (key: string) => {
-    let nextActiveKey = '';
-    const index = tabsRef.current.findIndex((item) => item.key === key);
-    if (index !== -1 && tabsRef.current[index].active) {
-      if (index === 0 && tabsRef.current.length > 1) {
-        nextActiveKey = tabsRef.current[index + 1].key;
-      } else if (index !== 0) {
-        nextActiveKey = tabsRef.current[index - 1].key;
-      }
-    }
-    tabsRef.current = tabsRef.current.filter((item) => item.key !== key);
-    active(nextActiveKey);
-    setTabs(tabsRef.current);
+  const activeTab = (id: string) => {
+    active(id);
+    setTabs(cloneDeep(tabsRef.current));
   };
 
-  const activeTab = (key: string) => {
-    active(key);
-    setTabs(tabsRef.current);
-  };
-
-  const active = (key: string) => {
-    if (!key) return;
-    const tab: ITab = tabsRef.current.find((item) => item.key === key);
+  /**
+   * 激活
+   * @param id 页签ID
+   */
+  const active = (id: string) => {
+    if (!id) return;
+    const tab: ITabData = tabsRef.current.find((item) => item.id === id);
     if (!tab?.active) {
       tabsRef.current.forEach((item) => (item.active = false));
       tab.active = true;
     }
   };
 
+  /**
+   * 关闭当前
+   * @param id 当前ID
+   */
+  const close = (id: string) => {
+    const tabList = cloneDeep(tabsRef.current);
+    const index = tabList.findIndex((item) => item.id === id);
+    const tabs = tabList.filter((item) => item.id !== id);
+    if (tabList[index]?.active) {
+      const activeIndex = index - 1 ?? index + 1;
+      tabs[activeIndex] && (tabs[activeIndex].active = true);
+    }
+    setTabs(tabs);
+  };
+
+  /**
+   * 关闭其他
+   * @param id 当前ID
+   */
+  const closeOther = (id: string) => {
+    const tab = tabsRef.current.find((item) => item.id === id);
+    setTabs([{ ...tab, active: true }]);
+  };
+
+  /**
+   * 关闭左侧
+   * @param id 当前ID
+   */
+  const closeLeft = (id: string) => {
+    const tabList = cloneDeep(tabsRef.current);
+    const index = tabList.findIndex((item) => item.id === id);
+    const tabs = tabList.filter((_, idx) => idx >= index);
+    const activeIndex = tabList.findIndex((item) => item.active);
+    if (activeIndex < index) {
+      tabs[0].active = true;
+    } else {
+      tabs[activeIndex - index].active = true;
+    }
+    setTabs(tabs);
+  };
+
+  /**
+   * 关闭右侧
+   * @param id 当前ID
+   */
+  const closeRight = (id: string) => {
+    const tabList = cloneDeep(tabsRef.current);
+    const index = tabList.findIndex((item) => item.id === id);
+    const tabs = tabList.filter((_, idx) => idx <= index);
+    const activeIndex = tabList.findIndex((item) => item.active);
+    if (activeIndex > index) {
+      tabs[tabs.length - 1].active = true;
+    }
+    setTabs(tabs);
+  };
+
+  /**
+   * 删除全部
+   */
   const clear = () => {
     tabsRef.current = [];
     setTabs(tabsRef.current);
   };
 
+  /**
+   * 更新
+   * @param id 页签ID
+   * @param updateData 更新的数据
+   */
+  const update = (id: string, updateData: Partial<Omit<ITabData, 'id'>>) => {
+    if (!id && !updateData) return;
+    const tabs = cloneDeep(tabsRef.current);
+    const index = tabs.findIndex((item) => item.id === id);
+    if (index !== -1) {
+      const tab = tabs[index];
+      tabs.splice(index, 1, { ...tab, ...updateData });
+      setTabs(tabs);
+    }
+  };
+
   return {
     add,
-    remove,
     active: activeTab,
-    clear
+    clear,
+    close,
+    closeOther,
+    closeLeft,
+    closeRight,
+    update,
   };
 }
