@@ -4,13 +4,13 @@
 @import './theme/light.less';
 
 * {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 html {
+  font-family: var(--font-family);
   font-size: 14px;
   background-color: #f3f4f6;
   overscroll-behavior-x: none;
@@ -28,6 +28,7 @@ html {
   left: 0;
   right: 0;
 }
+
 .titlebar-button {
   display: inline-flex;
   justify-content: center;
@@ -35,48 +36,10 @@ html {
   width: 30px;
   height: 30px;
 }
+
 .titlebar-button:hover {
   background: #5bbec3;
 }
-
-// Mui样式重写
-// .MuiButton-textPrimary {
-//   color: var(--lanis-db-primary-color) !important;
-
-//   &:hover {
-//     background-color: var(--lanis-db-primary-hover-color-1) !important;
-//   }
-// }
-
-// .MuiButton-outlinedPrimary:not(.MuiLoadingButton-loading) {
-//   color: var(--lanis-db-primary-color) !important;
-//   border-color: var(--lanis-db-primary-color);
-
-//   &:hover {
-//     border-color: var(--lanis-db-primary-color);
-//     background-color: var(--lanis-db-primary-hover-color-1);
-//   }
-// }
-
-// .MuiButton-containedPrimary:not(.MuiLoadingButton-loading) {
-//   background-color: var(--lanis-db-primary-color) !important;
-
-//   &:hover {
-//     background-color: var(--lanis-db-primary-hover-color-9) !important;
-//   }
-// }
-
-// .css-1c2i806-MuiFormLabel-root-MuiInputLabel-root.Mui-focused {
-//   color: var(--lanis-db-primary-color) !important;
-// }
-
-// .css-l4u8b9-MuiInputBase-root-MuiInput-root:after {
-//   border-bottom-color: var(--lanis-db-primary-color) !important;
-// }
-
-// .lanis-icon:hover {
-//   color: var(--lanis-db-primary-color) !important;
-// }
 
 .ant-popover {
   font-size: 12px !important;

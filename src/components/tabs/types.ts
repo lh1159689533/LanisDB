@@ -14,8 +14,6 @@ export interface ITabData {
   params?: { [key: string]: any };
   /** 禁止点击 */
   disabled?: boolean;
-  /** 是否可关闭 */
-  onClose?: (tabId: string) => void;
   /** 是否冻结（冻结在左侧，不参与滚动） */
   isFreeze?: boolean;
   /** 不在更多下拉中显示 */
@@ -23,4 +21,8 @@ export interface ITabData {
   active?: boolean;
   /** 是否保存,默认true */
   saved?: boolean;
+  /** 关闭 */
+  onClose?: (tabId: string) => void;
+  /** 保存 */
+  onSave?: (tabId: string) => void;
 }

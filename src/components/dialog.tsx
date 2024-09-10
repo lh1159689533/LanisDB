@@ -12,7 +12,7 @@ const Transition = forwardRef(function Transition(
 });
 
 interface ITransitionDialog {
-  open: boolean;
+  visible: boolean;
   title: string | React.ReactNode;
   children: React.ReactNode;
   okText?: string;
@@ -24,7 +24,7 @@ interface ITransitionDialog {
 }
 
 export default function TransitionDialog({
-  open,
+  visible,
   title,
   children,
   okText = '确定',
@@ -45,7 +45,7 @@ export default function TransitionDialog({
 
   return (
     <Dialog
-      open={open}
+      open={visible}
       TransitionComponent={Transition}
       fullWidth
       // onClose={handleClose}

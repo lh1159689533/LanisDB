@@ -4,8 +4,8 @@ import dayjs from 'dayjs';
 import { Tree, Select } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import { LoadingButton } from '@mui/lab';
-import { BaseDirectory, removeFile } from '@tauri-apps/api/fs';
-import store from '@src/utils/store';
+import { BaseDirectory, removeFile, readDir } from '@tauri-apps/api/fs';
+import useMessage from '@src/hooks/useMessage';
 import useTab from '@hooks/useTab';
 import { IPage } from '@src/types';
 import useAppState from '@src/hooks/useAppState';
@@ -13,10 +13,17 @@ import DB from '@src/utils/db';
 import LanisMenu from '@src/components/Menu';
 import { convertColumnType } from '@src/utils/db/utils';
 import { TableIcon, ColumnIcon } from '@components/icons-lanis';
+import Dialog from '@components/dialog';
+import EventBus from '@src/utils/eventBus';
 import { DIALECT } from '@src/constant';
 import ViewCreateSql from './components/viewCreateSql';
 
 import './index.less';
+
+interface ITreeData extends DataNode {
+  type?: string;
+  children?: ITreeData[];
+}
 
 /**
  * 更新树节点数据
@@ -24,7 +31,7 @@ import './index.less';
  * @param key 节点的key
  * @param children 子节点列表
  */
-const updateTreeData = (list: DataNode[], key: React.Key, children: DataNode[]): DataNode[] =>
+const updateTreeData = (list: ITreeData[], key: React.Key, children: ITreeData[]): ITreeData[] =>
   list.map((node) => {
     if (node.key === key) {
       return {
@@ -45,11 +52,6 @@ interface IParam {
   type?: string;
 }
 
-interface ITreeData extends DataNode {
-  type?: string;
-  children?: ITreeData[];
-}
-
 export default function Sidebar() {
   // 树数据
   const [treeData, setTreeData] = useState<ITreeData[]>([]);
@@ -61,6 +63,7 @@ export default function Sidebar() {
   const [databaseList, setDatabaseList] = useState([]);
   const [database, setDatabase] = useState('');
   const [loading, setLoading] = useState(false);
+  const [delQueryVisible, setDelQueryVisible] = useState(false);
 
   const menuRef = useRef(null);
 
@@ -68,6 +71,7 @@ export default function Sidebar() {
 
   const tab = useTab('sqlQueryResult');
   const tabSqlQuery = useTab('sqlQuery');
+  const message = useMessage();
 
   const { type } = useParams<IParam>();
 
@@ -90,9 +94,7 @@ export default function Sidebar() {
       id: 'deleteQuery',
       label: '删除',
       callback() {
-        tabSqlQuery.close(`${currentNode.key}`);
-        store.delItem(db.url, Number(currentNode.key));
-        removeFile(`sqlite/main/${currentNode.title}`, { dir: BaseDirectory.AppData });
+        setDelQueryVisible(true);
       },
     },
   ];
@@ -151,6 +153,24 @@ export default function Sidebar() {
   ];
 
   /**
+   * 删除查询脚本
+   */
+  const onDelQuery = () => {
+    tabSqlQuery.close(`${currentNode.key}`);
+    removeFile(`sqlite/main/${currentNode.title}.${currentNode.key}.sql`, { dir: BaseDirectory.AppData });
+    setDelQueryVisible(false);
+    setTreeData((origin) => {
+      const queries = origin.find((item) => item.key === 'query-list');
+      return updateTreeData(
+        origin,
+        'query-list',
+        queries.children.filter((item) => item.key !== currentNode.key)
+      );
+    });
+    message.success('删除成功');
+  };
+
+  /**
    * 查询表数据
    * @param tableName 表名
    * @param page 分页参数
@@ -206,11 +226,11 @@ export default function Sidebar() {
   /**
    * 节点被选择
    */
-  const handleSelect = (_, e) => {
-    if (e.node?.type === 'table') {
-      openTable(e.node?.title);
-    }
-  };
+  // const handleSelect = (_, e) => {
+  //   if (e.node?.type === 'table') {
+  //     openTable(e.node?.title);
+  //   }
+  // };
 
   /**
    * 右键点击事件
@@ -257,6 +277,39 @@ export default function Sidebar() {
         resolve();
       }
     });
+  };
+
+  /**
+   * 获取已保存的查询脚本
+   */
+  const getQuerys = async () => {
+    let querys = [];
+    try {
+      const sqlQueryPath = `sqlite/main`;
+      const files = await readDir(sqlQueryPath, { dir: BaseDirectory.AppData });
+      querys = files.map((item) => {
+        const [name, id] = item.name.split('.');
+        return {
+          id,
+          name,
+        };
+      });
+    } catch (e) {}
+
+    return {
+      key: 'query-list',
+      title: `查询（${querys?.length}）`,
+      icon: <TableIcon />,
+      selectable: false,
+      children: querys?.map((item) => ({
+        key: item.id,
+        title: item.name,
+        icon: <TableIcon />,
+        type: 'query',
+        children: null,
+        isLeaf: true,
+      })),
+    };
   };
 
   /**
@@ -313,21 +366,7 @@ export default function Sidebar() {
       ];
     }
 
-    const querys = await store.getItem<{ id: string; name: string; path: string }[]>(db.url);
-    treeData.push({
-      key: 'query-list',
-      title: `查询（${querys?.length}）`,
-      icon: <TableIcon />,
-      selectable: false,
-      children: querys?.map((item) => ({
-        key: item.id,
-        title: item.name,
-        icon: <TableIcon />,
-        type: 'query',
-        children: null,
-        isLeaf: true,
-      })),
-    });
+    treeData.push(await getQuerys());
     setTreeData(treeData);
   };
 
@@ -350,13 +389,6 @@ export default function Sidebar() {
   };
 
   /**
-   * 右键菜单关闭回调
-   */
-  const handleMenuClose = () => {
-    setCurrentNode(null);
-  };
-
-  /**
    * 查看建表语句modal关闭
    */
   const handleViewCreateSqlClose = () => {
@@ -376,6 +408,9 @@ export default function Sidebar() {
     setLoading(false);
   };
 
+  /**
+   * 右键菜单
+   */
   const getRightMenuList = () => {
     const nodeType = currentNode?.type;
     if (!['view', 'table', 'query'].includes(nodeType)) {
@@ -396,6 +431,14 @@ export default function Sidebar() {
     } else {
       getTables();
     }
+
+    EventBus.on('addQueryTree', async () => {
+      const queries = await getQuerys();
+      setTreeData((origin) => {
+        const treeData = origin.filter((item) => item.key !== 'query-list');
+        return [...treeData, queries];
+      });
+    });
 
     return () => {
       tab.clear();
@@ -431,6 +474,24 @@ export default function Sidebar() {
       )}
       <LanisMenu id="db_siderbar_tree__rightmenu" ref={menuRef} menus={getRightMenuList()} />
       <ViewCreateSql open={Boolean(createSql)} createSql={createSql} onClose={handleViewCreateSqlClose} />
+      <Dialog
+        visible={delQueryVisible}
+        title="删除查询"
+        maxWidth="xs"
+        actions={[
+          {
+            title: '确认',
+            primary: true,
+            handle: onDelQuery,
+          },
+          {
+            title: '取消',
+            handle: () => setDelQueryVisible(false),
+          },
+        ]}
+      >
+        确认删除 {currentNode?.title as string} 吗？
+      </Dialog>
     </div>
   );
 }

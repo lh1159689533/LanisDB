@@ -204,7 +204,7 @@ const onSuggestTableFields = async (modelId: string, tableInfo?: ITableInfo): Pr
       kind: CompletionItemKind.Text,
       detail: item.type ?? '',
       documentation: {
-        value: `数据库: ${item.dbName ?? ''}\n\n表: ${item.tblName ?? ''}\n\n说明: ${item.description ?? ''}`,
+        value: `数据库: ${item.dbName ?? '-'}\n\n表: ${item.tblName ?? '-'}\n\n说明: ${item.description ?? '-'}`,
       },
     };
   });
@@ -243,7 +243,7 @@ const onSuggestTableNames = async (modelId: string, cursorInfo: any): Promise<an
       sortText: `AB${item.name}`,
       kind: CompletionItemKind.Value,
       detail: '表',
-      documentation: `数据库：${item.dbName}`,
+      documentation: `数据库：${item.dbName ?? '-'}`,
     };
   });
 };

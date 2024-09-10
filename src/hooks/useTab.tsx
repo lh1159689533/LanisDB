@@ -51,7 +51,7 @@ export default function useTab(tabKey: string) {
     const index = tabList.findIndex((item) => item.id === id);
     const tabs = tabList.filter((item) => item.id !== id);
     if (tabList[index]?.active) {
-      const activeIndex = index - 1 ?? index + 1;
+      const activeIndex = index - 1 < 0 ? index : index - 1;
       tabs[activeIndex] && (tabs[activeIndex].active = true);
     }
     setTabs(tabs);

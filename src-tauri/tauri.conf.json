@@ -23,6 +23,8 @@
         "createDir": true,
         "readFile": true,
         "removeFile": true,
+        "readDir": true,
+        "removeDir": true,
         "scope": [
           "$APPDATA/**/*"
         ]

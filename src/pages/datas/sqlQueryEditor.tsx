@@ -9,24 +9,25 @@ import { IOperateItem } from '@src/types';
 import useAppState from '@src/hooks/useAppState';
 import useMessage from '@src/hooks/useMessage';
 import DB from '@src/utils/db';
-import store from '@src/utils/store';
 import useTab from '@hooks/useTab';
 import { convertColumnType } from '@src/utils/db/utils';
 import { DIALECT, SQLITE_FUNCTIONS } from '@src/constant';
 import { RunIcon, FormatIcon } from '@components/icons-lanis';
 import BubbleSQL from '@components/BubbleSQL';
 import Dialog from '@components/dialog';
+import EventBus from '@src/utils/eventBus';
 
 interface ISqlQueryEditor {
   tabId: string;
   tabName: string;
+  temporary?: boolean;
 }
 
-export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
+export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryEditor) {
   const [db] = useAppState<DB>('dbInstance');
 
   // sql编辑器内容
-  const [sqlContent, setSqlContent] = useState('');
+  const [initSqlContent, setInitSqlContent] = useState('');
   // sql编辑器已选择内容
   const [sqlSelContent, setSqlSelContent] = useState('');
   const [visible, setVisible] = useState(false);
@@ -34,7 +35,7 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
 
   const tabRef = useRef(null);
   const sqlEditorRef = useRef(null);
-  const updateHeightRef = useRef(null);
+  const sqlContent = useRef('');
 
   const tab = useTab('sqlQueryResult');
   const tabSql = useTab('sqlQuery');
@@ -47,30 +48,16 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
       title: sqlSelContent ? '执行选中' : '执行',
       icon: <RunIcon />,
       async handle() {
-        const result = await db.execute(sqlSelContent || sqlContent);
+        const result = await db.execute(sqlSelContent || sqlContent.current);
         if (result?.length) {
           result.forEach((item) => {
             if (item?.columns) {
-              showTableData(item.columns, item.data, sqlSelContent || sqlContent);
+              showTableData(item.columns, item.data, sqlSelContent || sqlContent.current);
             }
           });
         }
       },
     },
-    // {
-    //   key: 'save',
-    //   title: '保存',
-    //   icon: <SaveIcon />,
-    //   async handle() {
-    //     console.log('saveing...');
-    //     await new Promise((resolve) => {
-    //       setTimeout(() => {
-    //         console.log('saved');
-    //         resolve(null);
-    //       }, 6000);
-    //     });
-    //   },
-    // },
     {
       key: 'format',
       title: '格式化',
@@ -106,7 +93,7 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
   };
 
   const handleChange = (value: string, codeChanged: boolean) => {
-    setSqlContent(value);
+    sqlContent.current = value;
     tabSql.update(tabId, { saved: !codeChanged });
   };
 
@@ -114,11 +101,20 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
     setSqlSelContent(value);
   };
 
+  /**
+   * 自动补全-表
+   * @param dbName 库名
+   */
   const onTableCompletion = async (dbName: string) => {
     const tables = await db.getTables();
     return tables.map((item) => ({ name: item.name, dbName }));
   };
 
+  /**
+   * 自动补全-表字段
+   * @param dbName 库名
+   * @param tblName 表名
+   */
   const onColumnCompletion = async (dbName: string, tblName: string) => {
     const columns = await db.tableColumnsDetail(tblName);
     return columns.map((item) => ({
@@ -130,6 +126,9 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
     }));
   };
 
+  /**
+   * 自动补全-函数
+   */
   const onFunctionCompletion = () => {
     if (type === DIALECT.sqlite) {
       return SQLITE_FUNCTIONS;
@@ -143,27 +142,50 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
     setSqlQueryName(tabName);
   };
 
-  const onSave = async () => {
+  /**
+   * 查询脚本保存
+   */
+  const saveQuery = async () => {
     try {
       const sqlQueryPath = `sqlite/main`;
       if (!(await exists(sqlQueryPath, { dir: BaseDirectory.AppData }))) {
         await createDir(sqlQueryPath, { dir: BaseDirectory.AppData, recursive: true });
       }
-      await writeTextFile(`${sqlQueryPath}/${sqlQueryName}.sql`, sqlContent, { dir: BaseDirectory.AppData });
-      store.addItem(db.url, { name: sqlQueryName, path: `${sqlQueryPath}/${sqlQueryName}.sql` });
-      message.success('保存成功');
+      await writeTextFile(`${sqlQueryPath}/${sqlQueryName}.${tabId}.sql`, sqlContent.current, {
+        dir: BaseDirectory.AppData,
+      });
       onClose();
-      tabSql.update(tabId, { saved: true });
+      tabSql.update(tabId, { saved: true, title: sqlQueryName });
+      setInitSqlContent(sqlContent.current);
+      // 刷新左侧树
+      temporary && EventBus.emit('addQueryTree');
+      message.success('保存成功');
     } catch (e) {
       console.log(e);
       message.error(`保存出错：${e?.message ?? e}`);
     }
   };
 
+  /**
+   * 查询保存事件
+   */
+  const onSave = () => {
+    if (temporary) {
+      // 临时查询弹窗输入查询名称
+      setVisible(true);
+    } else {
+      saveQuery();
+    }
+  };
+
+  /**
+   * 获取查询脚本内容
+   */
   const getContent = async () => {
     const sqlQueryPath = `sqlite/main`;
-    const contents = await readTextFile(`${sqlQueryPath}/${tabName}.sql`, { dir: BaseDirectory.AppData });
-    setSqlContent(contents);
+    const contents = await readTextFile(`${sqlQueryPath}/${tabName}.${tabId}.sql`, { dir: BaseDirectory.AppData });
+    sqlContent.current = contents;
+    setInitSqlContent(contents);
   };
 
   useEffect(() => {
@@ -178,6 +200,7 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
         <AppBar items={items} type="icon" />
         <SqlEditor
           ref={sqlEditorRef}
+          value={initSqlContent}
           onChange={handleChange}
           onSelection={handleSelection}
           style={{ width: '100%', height: 'calc(100% - 48px)' }}
@@ -185,8 +208,8 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
             {
               id: `save-${tabId}`,
               key: EditorKeyMod.CtrlCmd | EditorKeyCode.KeyS,
-              async callback() {
-                setVisible(true);
+              callback: async () => {
+                onSave();
               },
             },
           ]}
@@ -196,14 +219,14 @@ export default function SqlQueryEditor({ tabId, tabName }: ISqlQueryEditor) {
         />
       </Box>
       <Dialog
-        open={visible}
+        visible={visible}
         title="保存查询"
         maxWidth="xs"
         actions={[
           {
             title: '保存',
             primary: true,
-            handle: onSave,
+            handle: saveQuery,
           },
           {
             title: '取消',

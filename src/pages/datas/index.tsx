@@ -55,6 +55,10 @@ export default function Datas() {
           onClose(id: string) {
             tab.close(id);
           },
+          params: {
+            temporary: true, // 临时查询
+          },
+          saved: false,
         });
       },
     },

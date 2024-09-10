@@ -35,6 +35,7 @@ const statement = () => {
     setStatement,
     createIndexStatement,
     createFunctionStatement,
+    createDatabaseStatement,
     updateStatement,
     showStatement,
     otherStatement,
@@ -60,6 +61,10 @@ const selectStatement = () => {
       result: ast[1],
       from: ast[2],
     };
+
+    if (ast[3]) {
+      result.orderBy = ast[3];
+    }
 
     if (ast[5]) {
       // eslint-disable-next-line prefer-destructuring
@@ -291,11 +296,20 @@ const tableName = () => {
   return chain([
     chain(stringOrWord)(),
     chain(
+      stringOrWord,
+      '.',
       stringOrWord
-      // '.',
-      // stringOrWord
     )((ast) => {
       return [ast[0], ast[2]];
+    }),
+    chain(
+      stringOrWord,
+      '.',
+      stringOrWord,
+      '.',
+      stringOrWord
+    )((ast) => {
+      return [ast[0], ast[2], ast[4]];
     }),
   ])((ast) => {
     if (ast[0].length === 1) {
@@ -308,6 +322,13 @@ const tableName = () => {
       return createTableName({
         namespace: ast[0][0],
         tableName: ast[0][1],
+      });
+    }
+    if (ast[0].length === 3) {
+      return createTableName({
+        namespace: ast[0][0],
+        schema: ast[0][1],
+        tableName: ast[0][2],
       });
     }
   });
@@ -391,7 +412,13 @@ const groupByStatement = () => {
 
 // ----------------------------------- orderBy -----------------------------------
 const orderByClause = () => {
-  return chain('order', 'by', orderByExpressionList)();
+  return chain(
+    'order',
+    'by',
+    orderByExpressionList
+  )((ast) => {
+    return ast[2];
+  });
 };
 
 const orderByExpressionList = () => {
@@ -399,7 +426,13 @@ const orderByExpressionList = () => {
 };
 
 const orderByExpression = () => {
-  return chain(expression, optional(['asc', 'desc']))();
+  // return chain(expression, optional(['asc', 'desc']))();
+  return chain(
+    columnField,
+    optional(['asc', 'desc'])
+  )((ast) => {
+    return ast[0];
+  });
 };
 
 /*
@@ -689,6 +722,11 @@ const field = () => {
 // ----------------------------------- create index expression -----------------------------------
 const createIndexStatement = () => {
   return chain('create', 'index', indexItem, onStatement, whereStatement)();
+};
+
+// create database
+const createDatabaseStatement = () => {
+  return chain('create', 'database', otherStatement)();
 };
 
 const indexItem = () => {

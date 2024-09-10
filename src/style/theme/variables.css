@@ -4,6 +4,7 @@
  */
 
 :root {
+  --font-family: PingFang SC, Microsoft YaHei, Hack;
   --font-size-h6-24px: 500 24px/30px PingFang SC;
   --font-size-h5-20px: 500 20px/28px PingFang SC;
   --font-size-h4-16px: 400 16px/24px PingFang SC;

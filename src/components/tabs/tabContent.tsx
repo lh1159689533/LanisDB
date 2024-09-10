@@ -48,7 +48,7 @@ export default function TabContent({
       style={
         activeId !== tabId
           ? { transform: 'translateX(-999em)', position: 'absolute' }
-          : { transform: 'translateX(0)', height: '100%', width: '100%', ...style }
+          : { transform: 'none', height: '100%', width: '100%', ...style }
       }
       className={className}
       key={tabId}

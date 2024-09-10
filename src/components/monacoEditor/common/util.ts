@@ -21,7 +21,7 @@ const getDatabaseList = async (modelId: string): Promise<string[]> => {
  * 获取表
  * @param databaseName 数据库名
  */
-const getTableListByDbName = async (modelId: string, databaseName: string): Promise<CompletionTable[]> => {
+const getTableListByDbName = async (modelId: string, databaseName?: string): Promise<CompletionTable[]> => {
   const tableApi = EventBus.get(modelId)?.table;
   if (!tableApi) return [];
 
