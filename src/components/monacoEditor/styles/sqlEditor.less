@@ -38,4 +38,131 @@
       background-color: var(--success-color-6-normal);
     }
   }
+
+  div[data-ui='table'] {
+    min-width: 300px;
+
+    div[data-ui='header'] {
+      display: flex;
+      flex-direction: column;
+
+      span[data-ui='table-name'] {
+        color: rgba(0, 0, 0, 0.9);
+        font-size: 12px;
+        font-weight: 600;
+        display: flex !important;
+        align-items: center;
+        gap: 6px;
+
+        & > div[data-ui='icon'] {
+          width: 16px;
+          height: 16px;
+          background-size: 100%;
+          background-image: url(data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20id%3D%22table%22%3E%3Cpath%20id%3D%22Union%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M3.2%203.60039V5.40037L5.6%205.40037H6.8H9.2H10.4L12.8%205.40037V3.60039H3.2ZM9.2%206.40037H6.8L6.8%209.40037H9.2V6.40037ZM10.4%209.40037V6.40037H12.8V9.40037H10.4ZM9.2%2010.4004H6.8L6.8%2013.2004H9.2V10.4004ZM10.4%2013.2004V10.4004H12.8V13.2004H10.4ZM3.2%206.40037H5.6L5.6%209.40037H3.2V6.40037ZM3.2%2010.4004H5.6L5.6%2013.2004H3.2V10.4004ZM2%205.40037V6.40037V9.40037V10.4004V13.6004C2%2014.0422%202.35817%2014.4004%202.8%2014.4004H13.2C13.6418%2014.4004%2014%2014.0422%2014%2013.6004V10.4004V9.40037V6.40037V5.40037V3.20039C14%202.75856%2013.6418%202.40039%2013.2%202.40039H2.8C2.35817%202.40039%202%202.75856%202%203.20039V5.40037Z%22%20fill%3D%22black%22%20fill-opacity%3D%220.66%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E);
+        }
+      }
+      div[data-ui='table-desc'] {
+        color: rgba(0, 0, 0, 0.66);
+        font-size: 12px;
+        padding: 0px 10px;
+      }
+    }
+    div[data-ui='columns'] {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid #e7eaef;
+      padding: 6px 0;
+
+      div[data-ui='column'] {
+        display: flex;
+        gap: 10px;
+        color: var(--lanis-db-text-color-dropdown);
+        font-family: 'PingFang SC';
+        font-size: 12px;
+        font-weight: 400;
+        padding: 0px 8px;
+
+        &:hover {
+          border-radius: 2px;
+          background: #f3f4f7;
+          cursor: pointer;
+        }
+
+        span[data-ui='column-name'] {
+          flex: 1;
+        }
+
+        & > span:nth-of-type(2) {
+          position: relative;
+          display: flex;
+          align-items: center;
+
+          &::after {
+            content: ' ';
+            width: 1px;
+            height: 10px;
+            display: inline-block;
+            background-color: #cfd5de;
+            margin-left: 10px;
+          }
+        }
+      }
+    }
+  }
+
+  div[data-ui='column'] {
+    display: grid;
+    gap: 4px;
+
+    & > div {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 8px;
+    }
+
+    div[data-ui='label'] {
+      color: rgba(0, 0, 0, 0.66);
+      font-size: 12px;
+      font-weight: 400;
+    }
+    div[data-ui='value'] {
+      color: #000000e5;
+      font-size: 12px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      & > div[data-ui='icon'] {
+        width: 16px;
+        height: 16px;
+        background-size: 100%;
+        background-image: url(data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20id%3D%22table%22%3E%3Cpath%20id%3D%22Union%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M3.2%203.60039V5.40037L5.6%205.40037H6.8H9.2H10.4L12.8%205.40037V3.60039H3.2ZM9.2%206.40037H6.8L6.8%209.40037H9.2V6.40037ZM10.4%209.40037V6.40037H12.8V9.40037H10.4ZM9.2%2010.4004H6.8L6.8%2013.2004H9.2V10.4004ZM10.4%2013.2004V10.4004H12.8V13.2004H10.4ZM3.2%206.40037H5.6L5.6%209.40037H3.2V6.40037ZM3.2%2010.4004H5.6L5.6%2013.2004H3.2V10.4004ZM2%205.40037V6.40037V9.40037V10.4004V13.6004C2%2014.0422%202.35817%2014.4004%202.8%2014.4004H13.2C13.6418%2014.4004%2014%2014.0422%2014%2013.6004V10.4004V9.40037V6.40037V5.40037V3.20039C14%202.75856%2013.6418%202.40039%2013.2%202.40039H2.8C2.35817%202.40039%202%202.75856%202%203.20039V5.40037Z%22%20fill%3D%22black%22%20fill-opacity%3D%220.66%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E);
+      }
+    }
+  }
+
+  div[data-ui='function'] {
+    display: grid;
+    gap: 4px;
+
+    & > div {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 8px;
+    }
+
+    div[data-ui='label'] {
+      color: rgba(0, 0, 0, 0.66);
+      font-size: 12px;
+      font-weight: 400;
+    }
+    div[data-ui='value'] {
+      color: #000000e5;
+      font-size: 12px;
+      font-weight: 400;
+      gap: 6px;
+      text-align: left;
+    }
+  }
 }

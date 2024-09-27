@@ -231,7 +231,8 @@ const joinPart = () => {
     [
       'join',
       'straight_join',
-      chain(['inner', 'cross', 'full'], 'join')(),
+      chain(['inner', 'cross'], 'join')(),
+      chain(['full'], optional('outer'), 'join')(),
       chain(['left', 'right'], optional('outer'), 'join')(),
       chain('natural', optional(['left', 'right'], optional('outer')), 'join')(),
     ],

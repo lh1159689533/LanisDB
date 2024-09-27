@@ -6,7 +6,7 @@ import './index.less';
 export interface IMenu {
   id: string;
   label: React.ReactNode;
-  callback?: () => void;
+  callback?: (tabId?: string) => void;
 }
 
 interface IMenuProps {

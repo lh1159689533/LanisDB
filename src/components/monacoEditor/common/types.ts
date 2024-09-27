@@ -54,6 +54,8 @@ export interface CompletionTable {
   dbName: string;
   /** 表名 */
   name: string;
+  /** 说明 */
+  desc?: string;
 }
 
 export interface CompletionFunc {
@@ -151,7 +153,7 @@ export interface SqlEditorProps extends Omit<BaseEditorProps, 'language'> {
    * @param tableName 表名
    * @param tableType 表类型
    */
-  onColumnCompletion?: (databaseName: string, tableName: string, tableType: string) => Promise<CompletionColumn[]>;
+  onColumnCompletion?: (databaseName: string, tableName: string, tableType?: string) => Promise<CompletionColumn[]>;
 }
 
 export type DiffEditorWillMount = (

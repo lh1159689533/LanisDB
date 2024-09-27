@@ -107,6 +107,7 @@ const KEYWORDS = [
   'ON',
   'OFFSET',
   'OUTER',
+  'FULL',
   'OVER',
   'PRIMARY',
   'RIGHT',
