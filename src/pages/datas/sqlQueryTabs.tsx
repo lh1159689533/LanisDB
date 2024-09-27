@@ -1,8 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Tabs, { ITabData, TabContent } from '@src/components/Tabs';
 import SqlQueryEditor from '@src/pages/datas/sqlQueryEditor';
 import useTab from '@hooks/useTab';
-import LanisMenu from '@src/components/Menu';
 
 interface SqlQueryTabs {
   tabs: ITabData[];
@@ -11,8 +10,6 @@ interface SqlQueryTabs {
 export default function SqlQueryTabs({ tabs }: SqlQueryTabs) {
   const [activeId, setActiveId] = useState('');
   const [currentTabId, setCurrentTabId] = useState('');
-
-  const menuRef = useRef(null);
 
   const tab = useTab('sqlQuery');
 
@@ -47,10 +44,8 @@ export default function SqlQueryTabs({ tabs }: SqlQueryTabs) {
   /**
    * tab右键菜单事件
    */
-  const onTabContextMenu = (e: React.MouseEvent, tabId: string) => {
-    e.preventDefault();
+  const onTabContextMenu = (tabId: string) => {
     setCurrentTabId(tabId);
-    menuRef.current?.show(e);
   };
 
   useEffect(() => {
@@ -60,27 +55,25 @@ export default function SqlQueryTabs({ tabs }: SqlQueryTabs) {
   }, [tabs]);
 
   return (
-    <>
-      <Tabs
-        activeId={tabs?.find((tab) => tab.active)?.id}
-        tabs={tabs}
-        boxClassName="wedata-design-mix"
-        onTabClick={onTabClick}
-        onTabContextMenu={onTabContextMenu}
-      >
-        {tabs.map((tab, index) => (
-          <TabContent
-            tabId={tab.id}
-            activeId={activeId ?? tabs?.[0]?.id}
-            forceRender={index < 10}
-            destroyInactiveTabContent={tabs.length > 20}
-            key={tab.id}
-          >
-            <SqlQueryEditor key={tab.id} tabId={tab.id} tabName={tab.title as string} {...(tab.params ?? {})} />
-          </TabContent>
-        ))}
-      </Tabs>
-      <LanisMenu id="sql_tabs__rightmenu" ref={menuRef} menus={getMenuList(currentTabId)} />
-    </>
+    <Tabs
+      activeId={tabs?.find((tab) => tab.active)?.id}
+      tabs={tabs}
+      contextMenu={{ id: 'sql_tabs__rightmenu', menus: getMenuList(currentTabId) }}
+      boxClassName="wedata-design-mix"
+      onTabClick={onTabClick}
+      onTabContextMenu={onTabContextMenu}
+    >
+      {tabs.map((tab, index) => (
+        <TabContent
+          tabId={tab.id}
+          activeId={activeId ?? tabs?.[0]?.id}
+          forceRender={index < 10}
+          destroyInactiveTabContent={tabs.length > 20}
+          key={tab.id}
+        >
+          <SqlQueryEditor key={tab.id} tabId={tab.id} tabName={tab.title as string} {...(tab.params ?? {})} />
+        </TabContent>
+      ))}
+    </Tabs>
   );
 }

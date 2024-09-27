@@ -1,14 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Tabs, { TabContent } from '@src/components/Tabs';
 import SqlQueryResult from '@src/pages/datas/sqlQueryResult';
 import useTab from '@hooks/useTab';
-import LanisMenu from '@src/components/Menu';
 
 export default function ResultTabs({ tabs, height }) {
   const [activeId, setActiveId] = useState(tabs?.[0]?.id);
   const [currentTabId, setCurrentTabId] = useState('');
-
-  const menuRef = useRef(null);
 
   const tab = useTab('sqlQueryResult');
 
@@ -43,10 +40,8 @@ export default function ResultTabs({ tabs, height }) {
   /**
    * tab右键菜单事件
    */
-  const onTabContextMenu = (e: React.MouseEvent, tabId: string) => {
-    e.preventDefault();
+  const onTabContextMenu = (tabId: string) => {
     setCurrentTabId(tabId);
-    menuRef.current?.show(e);
   };
 
   useEffect(() => {
@@ -56,27 +51,26 @@ export default function ResultTabs({ tabs, height }) {
   }, [tabs]);
 
   return (
-    <>
-      <Tabs
-        activeId={activeId || tabs?.[0]?.id}
-        tabs={tabs}
-        boxClassName="wedata-design-mix"
-        onTabClick={onTabClick}
-        onTabContextMenu={onTabContextMenu}
-      >
-        {tabs.map((tab, index) => (
-          <TabContent
-            tabId={tab.id}
-            activeId={activeId ?? tabs?.[0]?.id}
-            forceRender={index < 10}
-            destroyInactiveTabContent={tabs.length > 20}
-            key={tab.id}
-          >
-            <SqlQueryResult height={height - 36} {...(tab.params ?? {})} />
-          </TabContent>
-        ))}
-      </Tabs>
-      <LanisMenu id="result_tabs__rightmenu" ref={menuRef} menus={getMenuList(currentTabId)} />
-    </>
+    <Tabs
+      activeId={activeId || tabs?.[0]?.id}
+      tabs={tabs}
+      contextMenu={{ id: 'result_tabs__rightmenu', menus: getMenuList(currentTabId) }}
+      boxClassName="wedata-design-mix"
+      onTabClick={onTabClick}
+      onTabContextMenu={onTabContextMenu}
+      bubbleProps={{ placement: 'top' }}
+    >
+      {tabs.map((tab, index) => (
+        <TabContent
+          tabId={tab.id}
+          activeId={activeId ?? tabs?.[0]?.id}
+          forceRender={index < 10}
+          destroyInactiveTabContent={tabs.length > 20}
+          key={tab.id}
+        >
+          <SqlQueryResult height={height - 36} {...(tab.params ?? {})} />
+        </TabContent>
+      ))}
+    </Tabs>
   );
 }

@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { PopoverProps } from 'antd';
+import LanisMenu from '@src/components/Menu';
 import Tab from './tab';
 import More from './more';
 import { ITabData } from './types';
@@ -36,7 +37,8 @@ interface ITabs {
   /** 操作 */
   operates?: IOperate[];
   /** 右键菜单 */
-  menus?: IMenu[] | ((tabId: string) => IMenu[]);
+  menus?: IMenu[];
+  contextMenu?: { id: string; menus: IMenu[] };
   /** tab bar Bubble提示配置 */
   bubbleProps?: Omit<PopoverProps, 'content'>;
   /** 是否可编辑tab名称，默认false */
@@ -58,7 +60,7 @@ interface ITabs {
    * @param newName 新名称
    */
   onTabRename?: (tabId: string, newName: string) => Promise<void>;
-  onTabContextMenu?: (e: React.MouseEvent, tabId: string) => void;
+  onTabContextMenu?: (tabId: string) => void;
 }
 
 /**
@@ -73,6 +75,7 @@ export default function Tabs({
   boxClassName = '',
   children,
   operates,
+  contextMenu,
   bubbleProps,
   editable = false,
   onTabRename,
@@ -83,70 +86,84 @@ export default function Tabs({
   /** 更多下拉 */
   const moreTabs = useMemo(() => tabs.filter((item) => !item.hideInMore), [tabs]);
 
+  const menuRef = useRef(null);
+
+  /**
+   * tab右键菜单事件
+   */
+  const onContextMenu = (e: React.MouseEvent, tabId: string) => {
+    e.preventDefault();
+    menuRef.current?.show(e);
+    onTabContextMenu?.(tabId);
+  };
+
   return (
-    <div className={`${className ?? ''} tabs-container`} style={{ height: '100%', ...style }}>
-      <div className={`tabs-bar ${tabClassName} scrollbar-small`}>
-        <ul className="tabs-bar__freeze-list">
-          {tabs
-            .filter((item) => item.isFreeze)
-            .map((tab) => (
-              <Tab
-                data={tab}
-                activeId={activeId}
-                key={tab.id}
-                bubbleProps={bubbleProps}
-                onClose={onTabClose}
-                onClick={onTabClick}
-                onRename={onTabRename}
-                onContextMenu={onTabContextMenu}
-              />
-            ))}
-        </ul>
-        <ul className="tabs-bar-list">
-          {tabs
-            .filter((item) => !item.isFreeze)
-            .map((tab) => (
-              <Tab
-                data={tab}
-                activeId={activeId}
-                key={tab.id}
-                bubbleProps={bubbleProps}
-                editable={editable}
-                onClose={onTabClose}
-                onClick={onTabClick}
-                onRename={onTabRename}
-                onContextMenu={onTabContextMenu}
-              />
-            ))}
-        </ul>
-        <div className="tabs-addon">
-          {moreTabs?.length ? (
-            <>
-              <span className="separator"></span>
-              <More
-                tabs={moreTabs}
-                activeId={activeId}
-                onClick={onTabClick}
-                onClose={onTabClose}
-                boxClassName={boxClassName}
-              />
-            </>
-          ) : null}
-          {operates?.length ? (
-            <>
-              <span className="separator"></span>
-              <div className="tabs-operate">
-                {operates.map((item) => (
-                  <span key={item.id} className="tabs-operate-item" onClick={item.callback}>
-                    {item.icon}
-                  </span>
-                ))}
-              </div>
-            </>
-          ) : null}
+    <>
+      <div className={`${className ?? ''} tabs-container`} style={{ height: '100%', ...style }}>
+        <div className={`tabs-bar ${tabClassName} scrollbar-small`}>
+          <ul className="tabs-bar__freeze-list">
+            {tabs
+              .filter((item) => item.isFreeze)
+              .map((tab) => (
+                <Tab
+                  data={tab}
+                  activeId={activeId}
+                  key={tab.id}
+                  bubbleProps={bubbleProps}
+                  onClose={onTabClose}
+                  onClick={onTabClick}
+                  onRename={onTabRename}
+                  onContextMenu={onContextMenu}
+                />
+              ))}
+          </ul>
+          <ul className="tabs-bar-list">
+            {tabs
+              .filter((item) => !item.isFreeze)
+              .map((tab) => (
+                <Tab
+                  data={tab}
+                  activeId={activeId}
+                  key={tab.id}
+                  bubbleProps={bubbleProps}
+                  editable={editable}
+                  onClose={onTabClose}
+                  onClick={onTabClick}
+                  onRename={onTabRename}
+                  onContextMenu={onContextMenu}
+                />
+              ))}
+          </ul>
+          <div className="tabs-addon">
+            {moreTabs?.length ? (
+              <>
+                <span className="separator"></span>
+                <More
+                  tabs={moreTabs}
+                  activeId={activeId}
+                  onClick={onTabClick}
+                  onClose={onTabClose}
+                  boxClassName={boxClassName}
+                />
+              </>
+            ) : null}
+            {operates?.length ? (
+              <>
+                <span className="separator"></span>
+                <div className="tabs-operate">
+                  {operates.map((item) => (
+                    <span key={item.id} className="tabs-operate-item" onClick={item.callback}>
+                      {item.icon}
+                    </span>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
         </div>
+        <div className="tabs-content">{children instanceof Function ? children(activeId) : children}</div>
       </div>
-      <div className="tabs-content">{children instanceof Function ? children(activeId) : children}</div>
-    </div>
+      <LanisMenu id={contextMenu.id} ref={menuRef} menus={contextMenu.menus} />
+    </>
   );
 }
