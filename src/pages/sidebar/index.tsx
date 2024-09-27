@@ -20,8 +20,23 @@ import ViewCreateSql from './components/viewCreateSql';
 
 import './index.less';
 
+// 树节点类型
+enum TreeNodeType {
+  /** 视图 */
+  view,
+  /** 表 */
+  table,
+  /** 字段 */
+  column,
+  /** 查询脚本 */
+  query,
+}
+
+// 支持右键菜单的树节点类型
+const ContextMenuTreeNode = [TreeNodeType.view, TreeNodeType.table, TreeNodeType.query];
+
 interface ITreeData extends DataNode {
-  type?: string;
+  type?: TreeNodeType;
   children?: ITreeData[];
 }
 
@@ -236,6 +251,9 @@ export default function Sidebar() {
    * 右键点击事件
    */
   const handleRightClick = ({ event, node }) => {
+    if (!ContextMenuTreeNode.includes(node.type)) {
+      return;
+    }
     event.preventDefault();
     setCurrentNode(node);
     menuRef.current?.show(event);
@@ -250,7 +268,7 @@ export default function Sidebar() {
         resolve();
         return;
       }
-      if (type === 'table') {
+      if (type === TreeNodeType.table) {
         db.selectTableColumns(title).then((resp) => {
           const data = resp ?? [];
           setTreeData((origin) =>
@@ -261,10 +279,10 @@ export default function Sidebar() {
                 icon: <ColumnIcon />,
                 selectable: false,
                 children: data.map((name) => ({
-                  key: `column-${name}`,
+                  key: `${title}-column-${name}`,
                   title: name,
                   icon: <ColumnIcon />,
-                  type: 'column',
+                  type: TreeNodeType.column,
                   children: null,
                   isLeaf: true,
                 })),
@@ -305,7 +323,7 @@ export default function Sidebar() {
         key: item.id,
         title: item.name,
         icon: <TableIcon />,
-        type: 'query',
+        type: TreeNodeType.query,
         children: null,
         isLeaf: true,
       })),
@@ -318,6 +336,7 @@ export default function Sidebar() {
   const getTables = async () => {
     let treeData = [];
     const datas = await db.getTables();
+    // const tables = datas.map((item) => item[0]).reduce((acc, item) => [...acc, { [item.key]: item.value }], []);
 
     if (type === DIALECT.mysql) {
       const tables = datas.filter((item) => item.type !== 'VIEW');
@@ -332,7 +351,7 @@ export default function Sidebar() {
             key: `table-${item.name}`,
             title: item.name,
             icon: <TableIcon />,
-            type: 'table',
+            type: TreeNodeType.table,
           })),
         },
         {
@@ -344,7 +363,7 @@ export default function Sidebar() {
             key: `view-${item.name}`,
             title: item.name,
             icon: <TableIcon />,
-            type: 'view',
+            type: TreeNodeType.view,
             isLeaf: true,
           })),
         },
@@ -360,7 +379,7 @@ export default function Sidebar() {
             key: `table-${item.name}`,
             title: item.name,
             icon: <TableIcon />,
-            type: 'table',
+            type: TreeNodeType.table,
           })),
         },
       ];
@@ -375,7 +394,7 @@ export default function Sidebar() {
    */
   const getDatabases = async () => {
     setLoading(true);
-    const result: any = await db.select(`show databases`, false);
+    const result: any = await db.select(`show databases`);
     if (result) {
       const databaseList = result.map((item) => ({
         value: item.Database,
@@ -413,13 +432,13 @@ export default function Sidebar() {
    */
   const getRightMenuList = () => {
     const nodeType = currentNode?.type;
-    if (!['view', 'table', 'query'].includes(nodeType)) {
+    if (!ContextMenuTreeNode.includes(nodeType)) {
       return [];
     }
-    if (nodeType === 'view') {
+    if (nodeType === TreeNodeType.view) {
       return rightMenuView;
     }
-    if (nodeType === 'query') {
+    if (nodeType === TreeNodeType.query) {
       return rightMenuQuery;
     }
     return rightMenuTable;

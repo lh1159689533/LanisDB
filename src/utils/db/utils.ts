@@ -65,6 +65,7 @@ export const isSelectSql = (sql: string) => sql.trim().toLowerCase().startsWith(
 
 // 将数据库字段类型转为js可以识别的类型，table列编辑时用
 export const convertColumnType = (columnType: string): string => {
+  if (!columnType) return 'string';
   if (columnType.startsWith('VARCHAR')) return 'string';
   if (columnType.startsWith('INTEGER') || columnType.startsWith('BIGINT')) return 'number';
 

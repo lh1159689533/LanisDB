@@ -12,8 +12,10 @@ export default function ViewCreateSql({ open, createSql, onClose }) {
   };
 
   return (
-    <Dialog open={open} title="创建语句" okText="" cancleText="关闭" onClose={handleClose}>
-      <pre style={{ overflowX: 'auto', padding: '0.5em', color: '#383a42', background: '#fafafa', whiteSpace: 'pre-wrap' }}>
+    <Dialog visible={open} title="创建语句" okText="" cancleText="关闭" onClose={handleClose}>
+      <pre
+        style={{ overflowX: 'auto', padding: '0.5em', color: '#383a42', background: '#fafafa', whiteSpace: 'pre-wrap' }}
+      >
         <code className="sql">
           <p dangerouslySetInnerHTML={{ __html: hljs.highlight(createSql.trim(), { language: 'sql' }).value }}></p>
         </code>

@@ -49,12 +49,16 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
       icon: <RunIcon />,
       async handle() {
         const result = await db.execute(sqlSelContent || sqlContent.current);
-        if (result?.length) {
-          result.forEach((item) => {
-            if (item?.columns) {
-              showTableData(item.columns, item.data, sqlSelContent || sqlContent.current);
-            }
-          });
+        if (result?.[0]?.length) {
+          const columns = result[0][0].map((item, index) => ({
+            title: item.key,
+            field: `${item.key}-${index}`,
+            type: convertColumnType(item.type),
+          }));
+          const data = result[0].map((item) =>
+            item.reduce((acc, current, index) => ({ ...acc, [`${current.key}-${index}`]: current.value }), {})
+          );
+          showTableData(columns, data, sqlSelContent || sqlContent.current);
         }
       },
     },
@@ -79,11 +83,7 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
       ),
       params: {
         tableType: 'virtial',
-        columns: columns.map((item) => ({
-          title: item.name,
-          field: item.name,
-          type: convertColumnType(item.type),
-        })),
+        columns,
         data,
       },
       onClose(id: string) {

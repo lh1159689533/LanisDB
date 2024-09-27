@@ -35,7 +35,7 @@ class DB {
    * 查询所有表
    */
   @tryCatch
-  getTables(): Promise<any[]> {
+  async getTables(): Promise<any[]> {
     let sql = '';
     if (this.props.dialect === DIALECT.mysql) {
       const database = (this.props as IMysqlDBProps).database;
@@ -45,22 +45,20 @@ class DB {
       sql = 'select name from sqlite_master where type = "table" order by name';
     }
 
-    return this.select(sql, false) as Promise<any[]>;
+    const result = await this.select(sql);
+    return result.map((item) => item[0]).reduce((acc, item) => [...acc, { [item.key]: item.value }], []);
   }
 
   @tryCatch
   async getCreateSql(tableName: string, tableType: 'view' | 'table' = 'table') {
     let createSql: string;
     if (this.props.dialect === DIALECT.mysql) {
-      const result = await this.select(`show create ${tableType} ${tableName}`, false);
-      const key = tableType === 'table' ? 'Create Table' : 'Create View';
-      createSql = result?.[0]?.[key];
+      const result = await this.select(`show create ${tableType} ${tableName}`);
+      // const key = tableType === 'table' ? 'Create Table' : 'Create View';
+      createSql = result?.[0]?.[0]?.value;
     } else {
-      const result = await this.select(
-        `select sql from sqlite_master where type = "table" and name='${tableName}'`,
-        false
-      );
-      createSql = result?.[0]?.sql;
+      const result = await this.select(`select sql from sqlite_master where type = "table" and name='${tableName}'`);
+      createSql = result?.[0]?.[0]?.value;
     }
     return createSql;
   }
@@ -92,7 +90,14 @@ class DB {
       query: getTableColumnsSql(tableName, this.props.dialect, (this.props as IMysqlDBProps).database),
     });
 
-    return columns?.map((item) => item.name);
+    return columns
+      .map((item) =>
+        item.reduce((acc, item) => {
+          acc[item.key] = item.value;
+          return acc;
+        }, {})
+      )
+      ?.map((item) => item.name);
   }
 
   /**
@@ -113,7 +118,6 @@ class DB {
       });
       const total = countResult?.[0]?.total;
 
-      // const columns = await this.selectTableColumns(invokeKey, tableName);
       const columns = await this.tableColumnsDetail(tableName);
 
       return {
@@ -130,20 +134,25 @@ class DB {
    */
   @onlyOneSelect
   @tryCatch
-  async select(sql: string, hasColumns = true): Promise<any[] | ISelectResult> {
+  async select(sql: string): Promise<any[]> {
     const invokeKey = `${this.prefix}select`;
-    if (hasColumns) {
-      const columns = await this.tableColumnsDetail(patternTableNameBySql(sql));
-      const data = await invoke<any[]>(invokeKey, {
-        url: this.url,
-        query: sql,
-      });
-      return {
-        data,
-        columns,
-      };
-    }
-    return invoke<any[]>(invokeKey, { url: this.url, query: sql });
+    // if (hasColumns) {
+    //   const columns = await this.tableColumnsDetail(patternTableNameBySql(sql));
+    //   const data = await invoke<any[]>(invokeKey, {
+    //     url: this.url,
+    //     query: sql,
+    //   });
+    //   return {
+    //     data: data.map((item) =>
+    //       item.reduce((acc, ite) => {
+    //         acc[ite.key] = ite.value;
+    //         return acc;
+    //       }, {})
+    //     ),
+    //     columns,
+    //   };
+    // }
+    return await invoke<any[]>(invokeKey, { url: this.url, query: sql });
   }
 
   /**
@@ -184,15 +193,18 @@ class DB {
    * @param tableName 表名
    */
   private async tableColumnsDetail_sqlite(tableName: string): Promise<ITableColumnsDetail[]> {
-    const result = (await this.select(getTableColumnsSql(tableName, DIALECT.sqlite), false)) as any[];
+    const result = (await this.select(getTableColumnsSql(tableName, DIALECT.sqlite))) as any[];
+
     if (result?.length) {
-      return result.map(({ name, dflt_value, notnull, pk, type }) => ({
-        name,
-        defaultValue: dflt_value,
-        notNull: notnull === 1,
-        primaryKey: pk === 1,
-        type,
-      }));
+      return result
+        .map((item) => item.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}))
+        .map((item) => ({
+          name: item.name,
+          defaultValue: item.dflt_value,
+          notNull: item.notnull === 1,
+          primaryKey: item.pk === 1,
+          type: item.type,
+        }));
     }
     return null;
   }
@@ -203,22 +215,21 @@ class DB {
    */
   private async tableColumnsDetail_mysql(tableName: string): Promise<IMysqlTableColumnsDetail[]> {
     const result = (await this.select(
-      getTableColumnsSql(tableName, DIALECT.mysql, (this.props as IMysqlDBProps).database),
-      false
+      getTableColumnsSql(tableName, DIALECT.mysql, (this.props as IMysqlDBProps).database)
     )) as any[];
     if (result?.length) {
-      return result.map(
-        ({ name, defaultValue, notNull, characterName, type, collationName, columnComment, columnKey }) => ({
-          name,
-          defaultValue,
-          notNull: notNull === 'YES',
-          primaryKey: columnKey === 'PRI',
-          type,
-          columnComment,
-          characterName,
-          collationName,
-        })
-      );
+      return result
+        .map((item) => item.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}))
+        .map((item) => ({
+          name: item.name,
+          defaultValue: item.defaultValue,
+          notNull: item.notNull === 'YES',
+          primaryKey: item.columnKey === 'PRI',
+          type: item.type,
+          columnComment: item.columnComment,
+          characterName: item.characterName,
+          collationName: item.collationName,
+        }));
     }
     return null;
   }
