@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { cloneDeep } from 'lodash';
-import useAppState from './useAppState';
 import { ITabData } from '@src/components/Tabs/types';
+import EventBus from '@src/utils/eventBus';
+import { EVENT_KEY } from '@src/constant';
+import useAppState from './useAppState';
 
 export default function useTab(tabKey: string) {
   const [tabs, setTabs] = useAppState<ITabData[]>(tabKey);
@@ -45,12 +47,19 @@ export default function useTab(tabKey: string) {
   /**
    * 关闭当前
    * @param id 当前ID
+   * @param unSaveConfirm 未保存tab关闭确认
    */
-  const close = (id: string) => {
+  const close = (id: string, unSaveConfirm = true) => {
     const tabList = cloneDeep(tabsRef.current);
     const index = tabList.findIndex((item) => item.id === id);
+    const current = tabList[index];
+    if (!current?.saved && unSaveConfirm) {
+      // 触发未保存tab关闭确认
+      EventBus.emit(EVENT_KEY.UNSAVE_TAB_CLOSE, tabList[index]);
+      return;
+    }
     const tabs = tabList.filter((item) => item.id !== id);
-    if (tabList[index]?.active) {
+    if (current?.active) {
       const activeIndex = index - 1 < 0 ? index : index - 1;
       tabs[activeIndex] && (tabs[activeIndex].active = true);
     }

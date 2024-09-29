@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Tabs, { ITabData, TabContent } from '@src/components/Tabs';
 import SqlQueryEditor from '@src/pages/datas/sqlQueryEditor';
 import useTab from '@hooks/useTab';
+import UnSaveTip from '@src/components/Tabs/unSaveTip';
 
 interface SqlQueryTabs {
   tabs: ITabData[];
@@ -54,26 +55,29 @@ export default function SqlQueryTabs({ tabs }: SqlQueryTabs) {
     }
   }, [tabs]);
 
-  return (
-    <Tabs
-      activeId={tabs?.find((tab) => tab.active)?.id}
-      tabs={tabs}
-      contextMenu={{ id: 'sql_tabs__rightmenu', menus: getMenuList(currentTabId) }}
-      boxClassName="wedata-design-mix"
-      onTabClick={onTabClick}
-      onTabContextMenu={onTabContextMenu}
-    >
-      {tabs.map((tab, index) => (
-        <TabContent
-          tabId={tab.id}
-          activeId={activeId ?? tabs?.[0]?.id}
-          forceRender={index < 10}
-          destroyInactiveTabContent={tabs.length > 20}
-          key={tab.id}
-        >
-          <SqlQueryEditor key={tab.id} tabId={tab.id} tabName={tab.title as string} {...(tab.params ?? {})} />
-        </TabContent>
-      ))}
-    </Tabs>
-  );
+  return tabs?.length ? (
+    <>
+      <Tabs
+        activeId={tabs?.find((tab) => tab.active)?.id}
+        tabs={tabs}
+        contextMenu={{ id: 'sql_tabs__rightmenu', menus: getMenuList(currentTabId) }}
+        boxClassName="wedata-design-mix"
+        onTabClick={onTabClick}
+        onTabContextMenu={onTabContextMenu}
+      >
+        {tabs.map((tab, index) => (
+          <TabContent
+            tabId={tab.id}
+            activeId={activeId ?? tabs?.[0]?.id}
+            forceRender={index < 10}
+            destroyInactiveTabContent={tabs.length > 20}
+            key={tab.id}
+          >
+            <SqlQueryEditor key={tab.id} tabId={tab.id} tabName={tab.title as string} {...(tab.params ?? {})} />
+          </TabContent>
+        ))}
+      </Tabs>
+      <UnSaveTip />
+    </>
+  ) : null;
 }

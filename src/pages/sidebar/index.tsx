@@ -15,7 +15,7 @@ import { convertColumnType } from '@src/utils/db/utils';
 import { TableIcon, ColumnIcon } from '@components/icons-lanis';
 import Dialog from '@components/dialog';
 import EventBus from '@src/utils/eventBus';
-import { DIALECT } from '@src/constant';
+import { DIALECT, EVENT_KEY } from '@src/constant';
 import { getQueryPath } from '@src/utils';
 import ViewCreateSql from './components/viewCreateSql';
 
@@ -46,12 +46,14 @@ interface ITreeData extends DataNode {
  * @param list 树列表
  * @param key 节点的key
  * @param children 子节点列表
+ * @param currentNode 当前节点需要更新的数据
  */
-const updateTreeData = (list: ITreeData[], key: React.Key, children: ITreeData[]): ITreeData[] =>
+const updateTreeData = (list: ITreeData[], key: React.Key, children: ITreeData[], currentNode?): ITreeData[] =>
   list.map((node) => {
     if (node.key === key) {
       return {
         ...node,
+        ...(currentNode ?? {}),
         children,
       };
     }
@@ -179,11 +181,10 @@ export default function Sidebar() {
     setDelQueryVisible(false);
     setTreeData((origin) => {
       const queries = origin.find((item) => item.key === 'query-list');
-      return updateTreeData(
-        origin,
-        'query-list',
-        queries.children.filter((item) => item.key !== currentNode.key)
-      );
+      const children = queries.children.filter((item) => item.key !== currentNode.key);
+      return updateTreeData(origin, 'query-list', children, {
+        title: `查询（${children?.length}）`,
+      });
     });
     message.success('删除成功');
   };
@@ -457,7 +458,7 @@ export default function Sidebar() {
       getTables();
     }
 
-    EventBus.on('addQueryTree', async () => {
+    EventBus.on(EVENT_KEY.TREE_ADD_QUERY, async () => {
       const queries = await getQuerys();
       setTreeData((origin) => {
         const treeData = origin.filter((item) => item.key !== 'query-list');

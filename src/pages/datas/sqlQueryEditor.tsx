@@ -11,7 +11,7 @@ import useMessage from '@src/hooks/useMessage';
 import DB from '@src/utils/db';
 import useTab from '@hooks/useTab';
 import { convertColumnType } from '@src/utils/db/utils';
-import { DIALECT, SQLITE_FUNCTIONS } from '@src/constant';
+import { DIALECT, EVENT_KEY, SQLITE_FUNCTIONS } from '@src/constant';
 import { RunIcon, FormatIcon } from '@components/icons-lanis';
 import BubbleSQL from '@components/BubbleSQL';
 import Dialog from '@components/dialog';
@@ -160,7 +160,7 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
       tabSql.update(tabId, { saved: true, title: sqlQueryName });
       setInitSqlContent(sqlContent.current);
       // 刷新左侧树
-      temporary && EventBus.emit('addQueryTree');
+      temporary && EventBus.emit(EVENT_KEY.TREE_ADD_QUERY);
       message.success('保存成功');
     } catch (e) {
       console.log(e);
@@ -192,7 +192,21 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
 
   useEffect(() => {
     if (tabId) {
+      // 监听脚本保存
+      const saveAndCloseEventKey = `${EVENT_KEY.SAVE_AND_CLOSE_QUERY}-${tabId}`;
+      EventBus.on(saveAndCloseEventKey, async () => {
+        await saveQuery();
+        tabSql.close(tabId, false);
+      });
+      // 监听tab关闭
+      const tabCloseEventKey = `${EVENT_KEY.TAB_CLOSE}-${tabId}`;
+      EventBus.on(tabCloseEventKey, (tabId) => tabSql.close(tabId, false));
       getContent();
+
+      return () => {
+        EventBus.off(saveAndCloseEventKey);
+        EventBus.off(tabCloseEventKey);
+      };
     }
   }, [tabId]);
 

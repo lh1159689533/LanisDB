@@ -88,3 +88,17 @@ export const SQLITE_FUNCTIONS = [
  * mysql数据库常用函数
  */
 export const MYSQL_FUNCTIONS = [];
+
+/**
+ * EventBus监听事件key
+ */
+export enum EVENT_KEY {
+  /** tab关闭 */
+  TAB_CLOSE,
+  /** 未保存tab关闭 */
+  UNSAVE_TAB_CLOSE,
+  /** 保存并关闭查询脚本tab */
+  SAVE_AND_CLOSE_QUERY,
+  /** 刷新左侧查询脚本树 */
+  TREE_ADD_QUERY,
+}

@@ -114,7 +114,7 @@ export default function Datas() {
         </div>
         <section ref={sectionRef}>
           <div className="sql-tabs" style={{ height: `calc(100% - ${resultTabsHeight}px)` }}>
-            {sqlTabs?.length ? <SqlQueryTabs tabs={sqlTabs} /> : null}
+            <SqlQueryTabs tabs={sqlTabs} />
           </div>
           <div
             className="data-list"

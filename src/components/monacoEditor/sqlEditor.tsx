@@ -135,8 +135,6 @@ function SqlEditor(
     []
   );
 
-  console.log('sqlEditor:', style);
-
   return (
     <div
       ref={editorRef}
