@@ -75,11 +75,11 @@ export default function Home() {
    */
   const handleConnect = async (values) => {
     if (values.dialect === DIALECT.mysql) {
-      const { ip, port, username, password, dialect } = values;
-      await loadDB({ host: ip, port, username, password, dialect });
+      const { ip, port, username, password, dialect, id } = values;
+      await loadDB({ host: ip, port, username, password, dialect, id });
     } else if (values.dialect === DIALECT.sqlite) {
-      const { file, dialect } = values;
-      await loadDB({ storage: file, dialect });
+      const { file, dialect, id } = values;
+      await loadDB({ storage: file, dialect, id });
     }
 
     await appWindow.setTitle(`LanisDB - ${values.dialect}:${values.ip ?? values.file}`);
@@ -102,21 +102,22 @@ export default function Home() {
       if (modalType === 'edit') {
         newValues.id = editConnect.id;
       }
-      await store.addItem(DB_CONNECT_STORE_KEY, newValues);
+      const id = await store.addItem(DB_CONNECT_STORE_KEY, newValues);
       message.success('保存成功');
       getDBConnectData();
       setModalType('');
+      return id;
     } catch {
       message.error('保存失败');
     }
   };
 
-  const handleConfirm = (actionType: string, values?) => {
+  const handleConfirm = async (actionType: string, values?) => {
     if (actionType === 'connect') {
       handleConnect(values);
     } else if (actionType === 'saveAndConnect') {
-      saveDBConnect(values);
-      handleConnect(values);
+      const id = await saveDBConnect(values);
+      handleConnect({ ...values, id });
     } else if (actionType === 'save') {
       saveDBConnect(values);
     } else if (actionType === 'testConnect') {
@@ -243,9 +244,9 @@ export default function Home() {
           ))}
         </SpeedDial>
       </div>
-      {modalType === 'new' && <NewModal open={true} onClose={() => setModalType('')} onConfirm={handleConfirm} />}
+      {modalType === 'new' && <NewModal visible={true} onClose={() => setModalType('')} onConfirm={handleConfirm} />}
       {modalType === 'edit' && (
-        <NewModal data={editConnect} open={true} onClose={() => setModalType('')} onConfirm={handleConfirm} />
+        <NewModal data={editConnect} visible={true} onClose={() => setModalType('')} onConfirm={handleConfirm} />
       )}
     </div>
   );

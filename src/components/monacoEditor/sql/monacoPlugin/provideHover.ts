@@ -14,7 +14,7 @@ export const provideHover = async (model: monaco.editor.ITextModel, position: mo
   const parseResult: IParseResult = await sqlParser(model.getValue(), model.getOffsetAt(position));
   const cursorInfo = await reader.getCursorInfo(parseResult.ast, parseResult.cursorKeyPath);
 
-  if (cursorInfo.type === 'tableField') {
+  if (cursorInfo.type === 'tableField' || cursorInfo.type === 'tableFieldAfterGroup') {
     // 字段
     const cursorRootStatementFields = await reader.getFieldsFromStatement(
       parseResult.ast,
@@ -27,33 +27,53 @@ export const provideHover = async (model: monaco.editor.ITextModel, position: mo
         );
         return columns.map((item) => ({
           label: item.name,
-          sortText: item.tblName,
-          detail: item.type ?? '',
-          documentation: item.description,
+          tblName: item.tblName,
+          type: item.type ?? '',
+          description: item.description,
+          primaryKey: item.primaryKey,
         }));
       }
     );
-    const column = cursorRootStatementFields.find((item) => item.label === word?.word);
+
+    const column =
+      cursorInfo.type === 'tableField'
+        ? cursorRootStatementFields.find((item) => item.label === word?.word)
+        : cursorRootStatementFields.find(
+            (item) =>
+              item.label === word?.word &&
+              item.groupPickerName === (cursorInfo as ICursorInfo<{ groupName: string }>).groupName
+          );
+
+    const table = tables.find((item) => item.name === column.tblName);
 
     return {
       contents: [
         {
-          value: `<div data-ui="column">
+          value: `<div data-ui="column-info">
             <div>
               <div data-ui="label">所属表</div>
-              <div data-ui="value"><div data-ui="icon"></div>${column.sortText}</div>
+              <div data-ui="value"><div data-ui="icon"></div>${column.tblName}</div>
             </div>
+            ${
+              table?.description
+                ? `<div>
+                    <div data-ui="label">表说明</div>
+                    <div data-ui="value">${table.description}</div>
+                  </div>`
+                : '<span></span>'
+            }
             <div>
               <div data-ui="label">字段名</div>
-              <div data-ui="value">${column.label}</div>
+              <div data-ui="value">${column.label}
+              ${column.primaryKey ? '<div data-ui="primarykey">主键</div>' : ''}</div>
             </div>
             <div>
               <div data-ui="label">字段类型</div>
-              <div data-ui="value">${column.detail}</div>
+              <div data-ui="value">${column.type}</div>
             </div>
             <div>
               <div data-ui="label">字段描述</div>
-              <div data-ui="value">${column.documentation ?? '-'}</div>
+              <div data-ui="value">${column.description ?? '-'}</div>
             </div>
           </div>`,
           supportHtml: true,
@@ -74,16 +94,21 @@ export const provideHover = async (model: monaco.editor.ITextModel, position: mo
         {
           value: `<div data-ui="table">
             <div data-ui="header">
-              <span data-ui="table-name"><div data-ui="icon"></div>${table.name}</span>
-              <div data-ui="table-desc">${table.desc ?? ''}</div>
+              <div data-ui="table-name"><div data-ui="icon"></div>${table.name}</div>
+              <div data-ui="table-desc">${table.description ?? ''}</div>
             </div>
             <div data-ui="columns">
               ${columns
                 .map(
                   (item) =>
-                    `<div data-ui="column"><span data-ui="column-name">${item.name}</span><span>${
-                      item.type
-                    }</span><span>${item.description ?? '-'}</span></div>`
+                    `<div data-ui="column">
+                      <div data-ui="column-name">
+                        <div>${item.name}</div>
+                        ${item.primaryKey ? '<div data-ui="primarykey">主键</div>' : '<span></span>'}
+                      </div>
+                      <div>${item.type}</div>
+                      <div>${item.description ?? '-'}</div>
+                    </div>`
                 )
                 .join('')}
             </div>
@@ -109,7 +134,7 @@ export const provideHover = async (model: monaco.editor.ITextModel, position: mo
             </div>
             <div>
               <div data-ui="label">函数描述</div>
-              <div data-ui="value">${current.desc ?? '-'}</div>
+              <div data-ui="value">${current.description ?? '-'}</div>
             </div>
             <div>
               <div data-ui="label">函数用法</div>

@@ -47,6 +47,8 @@ export interface CompletionColumn {
   type: string;
   /** 字段描述 */
   description: string;
+  /** 是否主键 */
+  primaryKey?: boolean;
 }
 
 export interface CompletionTable {
@@ -55,7 +57,7 @@ export interface CompletionTable {
   /** 表名 */
   name: string;
   /** 说明 */
-  desc?: string;
+  description?: string;
 }
 
 export interface CompletionFunc {
@@ -66,7 +68,7 @@ export interface CompletionFunc {
   /** 用法 */
   usage?: string;
   /** 说明 */
-  desc?: string;
+  description?: string;
 }
 
 export interface MonacoEditorProps extends monacoEditor.editor.IStandaloneEditorConstructionOptions {

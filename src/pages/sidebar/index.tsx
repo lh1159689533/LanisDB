@@ -16,6 +16,7 @@ import { TableIcon, ColumnIcon } from '@components/icons-lanis';
 import Dialog from '@components/dialog';
 import EventBus from '@src/utils/eventBus';
 import { DIALECT } from '@src/constant';
+import { getQueryPath } from '@src/utils';
 import ViewCreateSql from './components/viewCreateSql';
 
 import './index.less';
@@ -23,13 +24,13 @@ import './index.less';
 // 树节点类型
 enum TreeNodeType {
   /** 视图 */
-  view,
+  view = 'view',
   /** 表 */
-  table,
+  table = 'table',
   /** 字段 */
-  column,
+  column = 'column',
   /** 查询脚本 */
-  query,
+  query = 'query',
 }
 
 // 支持右键菜单的树节点类型
@@ -172,7 +173,9 @@ export default function Sidebar() {
    */
   const onDelQuery = () => {
     tabSqlQuery.close(`${currentNode.key}`);
-    removeFile(`sqlite/main/${currentNode.title}.${currentNode.key}.sql`, { dir: BaseDirectory.AppData });
+    removeFile(`${getQueryPath(db.dialect, db.id)}/${currentNode.title}.${currentNode.key}.sql`, {
+      dir: BaseDirectory.AppData,
+    });
     setDelQueryVisible(false);
     setTreeData((origin) => {
       const queries = origin.find((item) => item.key === 'query-list');
@@ -234,8 +237,12 @@ export default function Sidebar() {
    * @param tableName 表名
    */
   const viewCreateSql = async (tableName: string, tableType?) => {
-    const createSql = await db.getCreateSql(tableName, tableType);
-    setCreateSql(createSql);
+    try {
+      const createSql = await db.getCreateSql(tableName, tableType);
+      setCreateSql(createSql);
+    } catch (e) {
+      message.error(e);
+    }
   };
 
   /**
@@ -303,7 +310,7 @@ export default function Sidebar() {
   const getQuerys = async () => {
     let querys = [];
     try {
-      const sqlQueryPath = `sqlite/main`;
+      const sqlQueryPath = `${db.dialect}/${db.id}`;
       const files = await readDir(sqlQueryPath, { dir: BaseDirectory.AppData });
       querys = files.map((item) => {
         const [name, id] = item.name.split('.');
@@ -336,7 +343,6 @@ export default function Sidebar() {
   const getTables = async () => {
     let treeData = [];
     const datas = await db.getTables();
-    // const tables = datas.map((item) => item[0]).reduce((acc, item) => [...acc, { [item.key]: item.value }], []);
 
     if (type === DIALECT.mysql) {
       const tables = datas.filter((item) => item.type !== 'VIEW');
@@ -394,8 +400,8 @@ export default function Sidebar() {
    */
   const getDatabases = async () => {
     setLoading(true);
-    const result: any = await db.select(`show databases`);
-    if (result) {
+    const result: any = await db.getDatabases();
+    if (result?.length) {
       const databaseList = result.map((item) => ({
         value: item.Database,
         label: item.Database,

@@ -16,6 +16,7 @@ import { RunIcon, FormatIcon } from '@components/icons-lanis';
 import BubbleSQL from '@components/BubbleSQL';
 import Dialog from '@components/dialog';
 import EventBus from '@src/utils/eventBus';
+import { getQueryPath } from '@src/utils';
 
 interface ISqlQueryEditor {
   tabId: string;
@@ -107,7 +108,7 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
    */
   const onTableCompletion = async (dbName: string) => {
     const tables = await db.getTables();
-    return tables.map((item) => ({ name: item.name, dbName }));
+    return tables.map((item) => ({ name: item.name, dbName, description: item.comment }));
   };
 
   /**
@@ -123,6 +124,7 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
       name: item.name,
       type: item.type,
       description: item.columnComment,
+      primaryKey: item.primaryKey,
     }));
   };
 
@@ -147,7 +149,7 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
    */
   const saveQuery = async () => {
     try {
-      const sqlQueryPath = `sqlite/main`;
+      const sqlQueryPath = getQueryPath(db.dialect, db.id);
       if (!(await exists(sqlQueryPath, { dir: BaseDirectory.AppData }))) {
         await createDir(sqlQueryPath, { dir: BaseDirectory.AppData, recursive: true });
       }
@@ -182,7 +184,7 @@ export default function SqlQueryEditor({ tabId, tabName, temporary }: ISqlQueryE
    * 获取查询脚本内容
    */
   const getContent = async () => {
-    const sqlQueryPath = `sqlite/main`;
+    const sqlQueryPath = getQueryPath(db.dialect, db.id);
     const contents = await readTextFile(`${sqlQueryPath}/${tabName}.${tabId}.sql`, { dir: BaseDirectory.AppData });
     sqlContent.current = contents;
     setInitSqlContent(contents);

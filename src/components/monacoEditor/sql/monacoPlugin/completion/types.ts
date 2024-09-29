@@ -43,6 +43,7 @@ export interface ICompletionItem {
   originFieldName?: string;
   detail?: string;
   documentation?: string;
+  [key: string]: any;
 }
 
 export type CursorType =

@@ -27,7 +27,7 @@ pub async fn mysql_select(
     db_instances: State<'_, DbInstances>,
     url: String,
     query: String,
-) -> Result<Vec<HashMap<String, JsonValue>>> {
+) -> Result<Vec<Vec<HashMap<&str, JsonValue>>>> {
     let mut instances = db_instances.0.lock().await;
     let db = instances
         .get_mut(&url)
@@ -37,13 +37,16 @@ pub async fn mysql_select(
 
     let mut values = Vec::new();
     for row in rows {
-        let mut value = HashMap::default();
+        let mut value = Vec::new();
         for (i, column) in row.columns().iter().enumerate() {
             let v = row.try_get_raw(i)?;
 
             let v = to_json_mysql(v)?;
 
-            value.insert(column.name().to_string(), v);
+            let mut map: HashMap<&str, JsonValue> = HashMap::default();
+            map.insert("key", JsonValue::String(column.name().to_string()));
+            map.insert("value", v);
+            value.push(map);
         }
 
         values.push(value);

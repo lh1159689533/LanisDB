@@ -220,7 +220,7 @@ const onSuggestFunctionName = async (modelId: string): Promise<any[]> => {
     kind: CompletionItemKind.Function,
     detail: '函数',
     documentation: {
-      value: `说明: ${item.desc ?? ''}\n\n用法: ${item.usage ?? ''}`,
+      value: `说明: ${item.description ?? ''}\n\n用法: ${item.usage ?? ''}`,
     },
   }));
 };

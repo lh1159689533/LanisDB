@@ -7,6 +7,7 @@ export type IDialect = keyof typeof DIALECT;
 export interface ISqliteDBProps {
   dialect: IDialect;
   storage?: string;
+  id: number;
 }
 
 // mysql数据库DB构造参数
@@ -17,6 +18,7 @@ export interface IMysqlDBProps {
   host: string;
   port: number;
   database?: string;
+  id: number;
 }
 
 // 执行sql结果

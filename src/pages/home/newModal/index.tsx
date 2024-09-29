@@ -19,7 +19,7 @@ interface IConfirmValues {
 }
 
 interface INewConnectModal {
-  open: boolean;
+  visible: boolean;
   data?: any;
   onClose: () => void;
   onConfirm: (actionType: string, values?: IConfirmValues) => void;
@@ -36,7 +36,7 @@ const DEFAULT_DATA = {
   description: '',
 };
 
-export default function NewConnectModal({ open, data, onConfirm, onClose }: INewConnectModal) {
+export default function NewConnectModal({ visible, data, onConfirm, onClose }: INewConnectModal) {
   const [form] = Form.useForm();
 
   const [dialect, setDialect] = useState<IDialect>(DIALECT.mysql);
@@ -64,10 +64,10 @@ export default function NewConnectModal({ open, data, onConfirm, onClose }: INew
   /**
    * 连接
    */
-  const handleConnect = async () => {
-    const values = await form.validateFields();
-    onConfirm('connect', values);
-  };
+  // const handleConnect = async () => {
+  //   const values = await form.validateFields();
+  //   onConfirm('connect', values);
+  // };
 
   /**
    * 连接并保存
@@ -98,12 +98,12 @@ export default function NewConnectModal({ open, data, onConfirm, onClose }: INew
       handle: handleTestConnect,
       visible: dialect === DIALECT.mysql,
     },
-    {
-      title: '连接',
-      primary: true,
-      handle: handleConnect,
-      visible: true,
-    },
+    // {
+    //   title: '连接',
+    //   primary: true,
+    //   handle: handleConnect,
+    //   visible: true,
+    // },
     {
       title: '保存',
       primary: true,
@@ -137,7 +137,7 @@ export default function NewConnectModal({ open, data, onConfirm, onClose }: INew
   }, [data]);
 
   return (
-    <Dialog open={open} title="新建连接" okText="新建" actions={actions.filter((item) => item.visible)}>
+    <Dialog visible={visible} title="新建连接" okText="新建" actions={actions.filter((item) => item.visible)}>
       <Form
         name="new"
         form={form}

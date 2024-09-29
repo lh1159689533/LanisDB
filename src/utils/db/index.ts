@@ -7,6 +7,7 @@ import {
   ITableColumnsDetail,
   IMysqlTableColumnsDetail,
   ISelectResult,
+  IDialect,
 } from './types';
 
 import { patternTableNameBySql, getDBUrl, getTableColumnsSql, getCountSql, isSelectSql } from './utils';
@@ -16,10 +17,14 @@ class DB {
   private props: IDBProps;
   private prefix: string;
   public url: string;
+  public dialect: IDialect;
+  public id: number;
 
   constructor(props: IDBProps) {
     this.props = props;
     this.prefix = '';
+    this.id = props.id;
+    this.dialect = props.dialect;
 
     this.prefix = `${this.props.dialect}_`;
     this.url = getDBUrl(props);
@@ -31,6 +36,12 @@ class DB {
     return new DB(props);
   }
 
+  @tryCatch
+  async getDatabases() {
+    const result: any = await this.select(`show databases`);
+    return this.tansformJsonArray(result);
+  }
+
   /**
    * 查询所有表
    */
@@ -40,13 +51,13 @@ class DB {
     if (this.props.dialect === DIALECT.mysql) {
       const database = (this.props as IMysqlDBProps).database;
       if (!database) throw new Error('mysql数据库查询未指定database');
-      sql = `select table_name as name, table_type as type from information_schema.tables where table_schema="${database}" order by table_name`;
+      sql = `select table_name as name, table_type as type, table_comment as comment from information_schema.tables where table_schema="${database}" order by table_name`;
     } else {
       sql = 'select name from sqlite_master where type = "table" order by name';
     }
 
     const result = await this.select(sql);
-    return result.map((item) => item[0]).reduce((acc, item) => [...acc, { [item.key]: item.value }], []);
+    return this.tansformJsonArray(result);
   }
 
   @tryCatch
@@ -54,8 +65,7 @@ class DB {
     let createSql: string;
     if (this.props.dialect === DIALECT.mysql) {
       const result = await this.select(`show create ${tableType} ${tableName}`);
-      // const key = tableType === 'table' ? 'Create Table' : 'Create View';
-      createSql = result?.[0]?.[0]?.value;
+      createSql = result?.[0]?.[1]?.value;
     } else {
       const result = await this.select(`select sql from sqlite_master where type = "table" and name='${tableName}'`);
       createSql = result?.[0]?.[0]?.value;
@@ -116,13 +126,14 @@ class DB {
         url: this.url,
         query: getCountSql(sql, tableName),
       });
-      const total = countResult?.[0]?.total;
+      const total = countResult?.[0]?.[0]?.value;
 
       const columns = await this.tableColumnsDetail(tableName);
+      const result: any = await invoke(invokeKey, { url: this.url, query: sql });
 
       return {
         columns,
-        data: await invoke(invokeKey, { url: this.url, query: sql }),
+        data: this.tansformJsonArray(result),
         total,
       };
     }
@@ -178,11 +189,11 @@ class DB {
     sqlList
       .filter((item) => !!item)
       .forEach((s) => {
-        if (isSelectSql(s)) {
-          promises.push(this.select(s));
-        } else {
-          promises.push(this.executeSql(s));
-        }
+        // if (isSelectSql(s)) {
+        promises.push(this.select(s));
+        // } else {
+        //   promises.push(this.executeSql(s));
+        // }
       });
 
     return Promise.all(promises);
@@ -196,15 +207,13 @@ class DB {
     const result = (await this.select(getTableColumnsSql(tableName, DIALECT.sqlite))) as any[];
 
     if (result?.length) {
-      return result
-        .map((item) => item.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}))
-        .map((item) => ({
-          name: item.name,
-          defaultValue: item.dflt_value,
-          notNull: item.notnull === 1,
-          primaryKey: item.pk === 1,
-          type: item.type,
-        }));
+      return this.tansformJsonArray(result).map((item) => ({
+        name: item.name,
+        defaultValue: item.dflt_value,
+        notNull: item.notnull === 1,
+        primaryKey: item.pk === 1,
+        type: item.type,
+      }));
     }
     return null;
   }
@@ -218,18 +227,16 @@ class DB {
       getTableColumnsSql(tableName, DIALECT.mysql, (this.props as IMysqlDBProps).database)
     )) as any[];
     if (result?.length) {
-      return result
-        .map((item) => item.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}))
-        .map((item) => ({
-          name: item.name,
-          defaultValue: item.defaultValue,
-          notNull: item.notNull === 'YES',
-          primaryKey: item.columnKey === 'PRI',
-          type: item.type,
-          columnComment: item.columnComment,
-          characterName: item.characterName,
-          collationName: item.collationName,
-        }));
+      return this.tansformJsonArray(result).map((item) => ({
+        name: item.name,
+        defaultValue: item.defaultvalue,
+        notNull: item.notnull === 'YES',
+        primaryKey: item.columnkey === 'PRI',
+        type: item.type,
+        columnComment: item.columncomment,
+        characterName: item.charactername,
+        collationName: item.collationname,
+      }));
     }
     return null;
   }
@@ -254,6 +261,11 @@ class DB {
   @tryCatch
   close(): Promise<boolean> {
     return invoke<boolean>(`${this.prefix}close`, { url: this.url });
+  }
+
+  @tryCatch
+  tansformJsonArray(list: { key: string; value: string }[][]): { [key: string]: any }[] {
+    return list.map((item) => item.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {}));
   }
 }
 

@@ -34,15 +34,21 @@ class Store {
    */
   async addItem<T, K extends T & { id: number }>(key: string, value: T): Promise<K[]> {
     const values = await this.getItem<K[]>(key);
-    const index = values?.findIndex((item) => item.id === (value as any).id);
-    if (values && index !== -1) {
+    let id = (value as any).id;
+    const index = values?.findIndex((item) => item.id === id);
+    if (index !== -1) {
       values.splice(index, 1, (value as unknown) as K);
-      return this.setItem<K[]>(key, values);
+      this.setItem<K[]>(key, values);
+      return id;
     }
+
+    id = Date.now();
     if (!values) {
-      return this.setItem<K[]>(key, [{ ...value, id: Date.now() } as K]);
+      this.setItem<K[]>(key, [{ ...value, id } as K]);
+      return id;
     }
-    return this.setItem<K[]>(key, [...values, { ...value, id: Date.now() } as K]);
+    this.setItem<K[]>(key, [...values, { ...value, id } as K]);
+    return id;
   }
 
   /**
